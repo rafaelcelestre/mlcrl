@@ -24,6 +24,7 @@ Or if you'd like to check out stuff that is awesome to people outside of MLCRL, 
 * [Berkeley DLAB course on Deep Learning](https://github.com/dlab-berkeley/Deep-Learning-in-R) - It is for R, not for Python, but includes material and [slides](https://dlab-berkeley.github.io/Deep-Learning-in-R/slides.html#1)  of interest. In particular it uses Keras. 
 * [Berkeley DLAB course on ML in python](https://github.com/dlab-berkeley/python-machine-learning) - Also with [slides](https://github.com/dlab-berkeley/python-machine-learning/blob/master/Machine_Learning_Review.pdf).
 * [Berkeley DLAB Artificial Neural Networks fundamentals](https://github.com/dlab-berkeley/ANN-fundamentals)
+* [Keras for researches - intro](https://keras.io/getting_started/intro_to_keras_for_researchers/)
 
 ## Bibliography - Papers
 * [Practical sensorless aberration estimation for 3D microscopy with deep learning](https://doi.org/10.1364/OE.401933)
