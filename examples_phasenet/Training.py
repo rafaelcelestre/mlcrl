@@ -7,7 +7,7 @@ from srxraylib.plot.gol import set_qt
 set_qt()
 
 
-from phasenet.model import PhaseNet, Config, Data
+from mlcrl.phasenet.model import PhaseNet, Config, Data
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 import numpy as np
@@ -20,13 +20,14 @@ import numpy as np
 # In[6]:
 
 
-from IPython.display import Markdown
+# from IPython.display import Markdown
 import re
 hlp = '### ' + Config.__doc__
 def _replace(s):
     return f"  \n\n`{s.group(1).strip()}`: "
 hlp = re.sub(r'\n\s*:param([^:]+):', _replace, hlp)
-print(Markdown(hlp))
+print(hlp)
+# print(Markdown(hlp))
 # display(Markdown(hlp))
 
 

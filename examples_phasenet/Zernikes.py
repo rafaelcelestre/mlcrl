@@ -7,7 +7,7 @@ from srxraylib.plot.gol import set_qt
 set_qt()
 
 
-from phasenet.zernike import Zernike
+from mlcrl.phasenet.zernike import Zernike
 import matplotlib.pyplot as plt
 import numpy as np
 

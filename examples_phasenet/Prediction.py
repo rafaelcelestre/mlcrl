@@ -4,8 +4,8 @@
 # In[20]:
 
 
-from phasenet.model import PhaseNet
-from phasenet.zernike import ZernikeWavefront
+from mlcrl.phasenet.model import PhaseNet
+from mlcrl.phasenet.zernike import ZernikeWavefront
 from csbdeep.utils import normalize, download_and_extract_zip_file
 import matplotlib.pyplot as plt
 from pathlib import Path

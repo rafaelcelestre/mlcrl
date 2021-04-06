@@ -7,7 +7,7 @@ from srxraylib.plot.gol import set_qt
 set_qt()
 
 
-from phasenet.zernike import ZernikeWavefront, random_zernike_wavefront
+from mlcrl.phasenet.zernike import ZernikeWavefront, random_zernike_wavefront
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -73,7 +73,7 @@ print(f.amplitudes_noll)
 print(f.amplitudes_ansi)
 
 plt.imshow(f.polynomial(512)); plt.colorbar(); plt.axis('off');
-plt.set_title(repr(f.zernikes))
+plt.title(repr(f.zernikes))
 plt.show()
 
 # In[6]:
