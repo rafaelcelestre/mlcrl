@@ -41,7 +41,7 @@ setup(name='mlcrl',
         'mlcrl.phasenet',
         ],
     install_requires=[
-        'csbdeep', # required by phasenet
+        'csbdeep', 'oasys-srwpy>=1.0.3', 'oasys-barc4ro>=1.0.2'
         ],
     package_data={
         },
