@@ -5,7 +5,7 @@
 # Authors/Contributors: Rafael Celestre
 # Rafael.Celestre@esrf.eu
 # creation: 01/04/2021
-# last update: 01/04/2021 (v0.0)
+# last update: 14/04/2021 (v0.1)
 ###################################################################################
 
 
@@ -17,6 +17,8 @@ import logging.handlers
 import numpy as np
 import os
 import time
+
+import h5py
 
 try:
     from oasys_srw.srwlib import *
@@ -145,6 +147,157 @@ def get_mask(_mesh, _Dx, _Dy, _shape='r', _ap_or_ob='a'):
         mask = np.logical_not(mask)
 
     return mask
+
+
+def save_wfr_2_hdf5(_wfr,_filename,_subgroupname="wfr",_complex_amplitude=True,_intensity=False,_amplitude=False,_phase=False,_overwrite=True):
+    """
+    Auxiliary function to write wavefront data into a hdf5 generic file.
+    When using the append mode to write h5 files, overwriting does not work and makes the code crash. To avoid this
+    issue, try/except is used. If by any chance a file should be overwritten, it is firstly deleted and re-written.
+    :param _wfr: input / output resulting Wavefront structure (instance of SRWLWfr);
+    :param _filename: path to file for saving the wavefront
+    :param _subgroupname: container mechanism by which HDF5 files are organised
+    :param _complex_amplitude: complex electric field for sigma and pi polarisation
+    :param _intensity: Single-Electron" Intensity - total polarisation (instance of srwl.CalcIntFromElecField)
+    :param _amplitude: S0 Stokes parameter. I = P_0 + P_90 = <Ex^2 + Ey^2>.
+    :param _phase: "Single-Electron" Radiation Phase - total polarisation (instance of srwl.CalcIntFromElecField)
+    :param _overwrite: flag that should always be set to True to avoid infinity loop on the recursive part of the function.
+    """
+
+    def _dump_arr_2_hdf5(_arr, _calculation, _filepath, _subgroupname):
+        """
+        Auxiliary routine to save_radiograph_2_hdf5()
+        :param _arr: (usually 2D) array to be saved on the hdf5 file inside the _subgroupname
+        :param _calculation
+        :param _filepath: path to file for saving the wavefront
+        :param _subgroupname: container mechanism by which HDF5 files are organised
+        """
+        sys.stdout.flush()
+        f = h5py.File(_filepath, 'a')
+        try:
+            f1 = f.create_group(_subgroupname)
+        except:
+            f1 = f[_subgroupname]
+        # f1[_calculation] = _arr
+        fdata = f1.create_dataset(_calculation, data=_arr)
+        f.close()
+
+    def _SRW_2_Numpy(_srw_array, _nx, _ny, _ne):
+        """
+        Converts an SRW array to a numpy.array.
+        :param _srw_array: SRW array
+        :param _nx: numbers of points vs horizontal positions
+        :param _ny: numbers of points vs vertical positions
+        :param _ne: numbers of points vs photon energy
+        :return: 4D numpy array: [energy, horizontal, vertical, polarisation={0:horizontal, 1: vertical}]
+        """
+        re = np.array(_srw_array[::2], dtype=np.float)
+        im = np.array(_srw_array[1::2], dtype=np.float)
+
+        e = re + 1j * im
+        e = e.reshape((_ny, _nx, _ne, 1))
+        e = e.swapaxes(0, 2)
+
+        return e.copy()
+
+    try:
+        if not os.path.isfile(_filename):  # if file doesn't exist, create it.
+            sys.stdout.flush()
+            f = h5py.File(_filename, 'w')
+            # points to the default data to be plotted
+            f.attrs['default']          = 'entry'
+            # give the HDF5 root some more attributes
+            f.attrs['file_name']        = _filename
+            f.attrs['file_time']        = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
+            f.attrs['creator']          = 'save_wfr_2_hdf5'
+            f.attrs['code']             = 'SRW'
+            f.attrs['HDF5_Version']     = h5py.version.hdf5_version
+            f.attrs['h5py_version']     = h5py.version.version
+            f.close()
+
+        if _amplitude:
+            ar1 = array('f', [0] * _wfr.mesh.nx * _wfr.mesh.ny)  # "flat" 2D array to take intensity data
+            srwl.CalcIntFromElecField(ar1, _wfr, 6, 0, 3, _wfr.mesh.eStart, 0, 0)
+            arxx = np.array(ar1)
+            arxx = arxx.reshape((_wfr.mesh.ny, _wfr.mesh.nx))#.T
+            arxx = np.sqrt(arxx)
+            _dump_arr_2_hdf5(arxx,"amplitude/wfr_amplitude", _filename, _subgroupname)
+
+        if _phase:
+            ar1 = array('d', [0] * _wfr.mesh.nx * _wfr.mesh.ny)  # "flat" 2D array to take intensity data
+            srwl.CalcIntFromElecField(ar1, _wfr, 0, 4, 3, _wfr.mesh.eStart, 0, 0)
+            arxx = np.array(ar1)
+            arxx = arxx.reshape((_wfr.mesh.ny, _wfr.mesh.nx))#.T
+
+            _dump_arr_2_hdf5(arxx, "phase/wfr_phase", _filename, _subgroupname)
+
+        if (_complex_amplitude) or (_intensity):
+            x_polarization = _SRW_2_Numpy(_wfr.arEx, _wfr.mesh.nx, _wfr.mesh.ny, _wfr.mesh.ne)   # sigma
+            y_polarization = _SRW_2_Numpy(_wfr.arEy, _wfr.mesh.nx, _wfr.mesh.ny, _wfr.mesh.ne)   # pi
+
+            e_field = np.concatenate((x_polarization, y_polarization), 3)
+
+            if _complex_amplitude:
+                _dump_arr_2_hdf5(e_field[0,:,:,0].T, "wfr_complex_amplitude_s", _filename, _subgroupname)
+                _dump_arr_2_hdf5(e_field[0,:,:,1].T, "wfr_complex_amplitude_p", _filename, _subgroupname)
+
+            if _intensity:
+                intens = np.abs(e_field[0, :, :, 0]) ** 2 + np.abs(e_field[0, :, :, 1]) ** 2
+                _dump_arr_2_hdf5(intens.T,"intensity/wfr_intensity",_filename, _subgroupname)
+
+
+        f = h5py.File(_filename, 'a')
+        f1 = f[_subgroupname]
+
+        # points to the default data to be plotted
+        f1.attrs['NX_class'] = 'NXentry'
+        f1.attrs['default']  = 'intensity'
+
+        #f1["wfr_method"] = "SRW"
+        f1["wfr_photon_energy"] = _wfr.mesh.eStart
+        f1["wfr_Rx_dRx"] =  np.array([_wfr.Rx,_wfr.dRx])
+        f1["wfr_Ry_dRy"] =  np.array([_wfr.Ry,_wfr.dRy])
+        f1["wfr_mesh_X"] =  np.array([_wfr.mesh.xStart,_wfr.mesh.xFin,_wfr.mesh.nx])
+        f1["wfr_mesh_Y"] =  np.array([_wfr.mesh.yStart,_wfr.mesh.yFin,_wfr.mesh.ny])
+
+        # Add NX plot attribites for automatic plot with silx view
+        myflags = [_intensity,_amplitude,_phase]
+        mylabels = ['intensity','amplitude','phase']
+        for i,label in enumerate(mylabels):
+            if myflags[i]:
+
+                f2 = f1[mylabels[i]]
+                f2.attrs['NX_class'] = 'NXdata'
+                f2.attrs['signal'] = 'wfr_%s'%(mylabels[i])
+                f2.attrs['axes'] = [b'axis_y', b'axis_x']
+
+                # ds = nxdata.create_dataset('image_data', data=data)
+                f3 = f2["wfr_%s"%(mylabels[i])]
+                f3.attrs['interpretation'] = 'image'
+
+                # X axis data
+                ds = f2.create_dataset('axis_y', data=1e6*np.linspace(_wfr.mesh.yStart,_wfr.mesh.yFin,_wfr.mesh.ny))
+                # f1['axis1_name'] = np.arange(_wfr.mesh.ny)
+                ds.attrs['units'] = 'microns'
+                ds.attrs['long_name'] = 'Y Pixel Size (microns)'    # suggested X axis plot label
+                #
+                # Y axis data
+                ds = f2.create_dataset('axis_x', data=1e6*np.linspace(_wfr.mesh.xStart,_wfr.mesh.xFin,_wfr.mesh.nx))
+                ds.attrs['units'] = 'microns'
+                ds.attrs['long_name'] = 'X Pixel Size (microns)'    # suggested Y axis plot label
+        f.close()
+
+        FileName = _filename.split("/")
+        print(">>>> save_wfr_2_hdf5: file witten/updated %s" %FileName[-1])
+
+    except:
+        if _overwrite is not True:
+            print(">>>> Bad input argument")
+            return
+        os.remove(_filename)
+        FileName = _filename.split("/")
+        print(">>>> save_wfr_2_hdf5: file deleted %s"%FileName[-1])
+        save_wfr_2_hdf5(_wfr,_filename,_subgroupname,_complex_amplitude,_intensity,_amplitude,_phase,_overwrite = False)
 
 
 if __name__ == '__main__':
@@ -390,22 +543,24 @@ if __name__ == '__main__':
         mesh.yFin = mesh.yStart + dy * (mesh.ny - 1)
 
         mask = get_mask(mesh, _Dx=mesh.xFin-mesh.xStart, _Dy=mesh.yFin-mesh.yStart, _shape='c', _ap_or_ob='a')
-        err_rms, err_pv = get_mtrl_stats(thcknss_err*1e6, _mask=None)
+        err_rms, err_pv = get_mtrl_stats(thcknss_err*1e6, _mask=np.logical_not(mask))
         logging.info('Fig.err. rms: ' + str(err_rms) + ' [um] and PV:' + str(err_pv) + ' [um]')
         logging.info('Z coefficients (um): \n' + str(Zcoeffs))
 
     elif args.lens == 2:
+        logging.info('>>> metrology file: ' + args.mtrl.split('/')[-1])
+
         amp_coef = 1
         thcknss_err, mesh = srwl_uti_read_intens_ascii(args.mtrl)
-        oe_crl_error = b4ro.srwl_opt_setup_CRL_error(thcknss_err, mesh, args.delta,
-                                                     wavelength/(4*np.pi*args.beta), _amp_coef=-amp_coef)
+        oe_crl_error = b4ro.srwl_opt_setup_CRL_metrology(thcknss_err, mesh, args.delta, wavelength/(4*np.pi*args.beta),
+                                                         _amp_coef=-amp_coef)
         Zcoeffs, fit, residues = b4wf.fit_zernike_circ(np.reshape(thcknss_err, (mesh.ny, mesh.nx)),
                                                        nmodes=37, startmode=1, rec_zern=False)
 
         mask = get_mask(mesh, _Dx=mesh.xFin-mesh.xStart, _Dy=mesh.yFin-mesh.yStart, _shape='c', _ap_or_ob='a')
-        err_rms, err_pv = get_mtrl_stats(thcknss_err*1e6, _mask=None)
+        err_rms, err_pv = get_mtrl_stats(np.reshape(thcknss_err, (mesh.ny, mesh.nx))*1e6, _mask=np.logical_not(mask))
         logging.info('Fig.err. rms: ' + str(err_rms) + ' [um] and PV:' + str(err_pv) + ' [um]')
-        logging.info('Z coefficients (um): \n' + str(Zcoeffs))
+        logging.info('Z coefficients (um): \n' + str(Zcoeffs*1e6))
 
     if caustics:
         if args.illum == 0:
@@ -428,7 +583,7 @@ if __name__ == '__main__':
     # ============= Wavefront Propagation Parameters =======================#
 
     #               [ 0] [1] [2]  [3]  [4]  [5]  [6]  [7]   [8]  [9] [10] [11]
-    ppApCRL =       [0,   0,  1,   0,   0,   1,   10,  1,   10,   0,   0,   0]
+    ppApCRL =       [0,   0,  1,   0,   0,   1,   5,   1,    5,   0,   0,   0]
     ppThinLens =    [0,   0,  1,   0,   0,   1,   1,   1,    1,   0,   0,   0]
     ppCRL =         [0,   0,  1,   1,   0,   1,   1,   1,    1,   0,   0,   0]
     ppDrift =       [0,   0,  1,   1,   0,   1,   1,   1,    1,   0,   0,   0]
@@ -475,7 +630,7 @@ if __name__ == '__main__':
     logging.info('- Simulating Electric Field Wavefront Propagation ... ')
     srwl.PropagElecField(wfr, optBL)
 
-    Rx, Ry = get_radii(wfr, stvt_x=50, stvt_y=50, silent=True)
+    Rx, Ry = get_radii(wfr, stvt_x=100, stvt_y=100, silent=True)
 
     logging.info('Propagated wavefront:')
     logging.info('Nx = %d, Ny = %d' % (wfr.mesh.nx, wfr.mesh.ny))
@@ -495,8 +650,10 @@ if __name__ == '__main__':
         srwl.CalcIntFromElecField(arP1, wfr, 0, 4, 3, wfr.mesh.eStart, 0, 0)
 
     if save is True and caustics is False:
-        srwl_uti_save_intens_ascii(arI1, wfr.mesh, os.path.join(os.getcwd(), strDataFolderName,  strIntPropOutFileName), 0)
-
+        # srwl_uti_save_intens_ascii(arI1, wfr.mesh, os.path.join(strDataFolderName,  strIntPropOutFileName), 0)
+        save_wfr_2_hdf5(wfr, _filename=os.path.join(strDataFolderName,  strIntPropOutFileName),
+                        _subgroupname="wfr", _complex_amplitude=False, _intensity=True, _amplitude=False,
+                        _phase=False, _overwrite=True)
     logging.info('>> single electron calculations: done')
 
     if caustics:
@@ -512,10 +669,17 @@ if __name__ == '__main__':
                 optBLp = SRWLOptC(cst_drift, ppDrift)
                 srwl.PropagElecField(wfr, optBLp)
 
-            filename = strDataFolderName + '/' + prfx.replace('XXX', '%.3d')%k
             arI1 = array('f', [0] * wfr.mesh.nx * wfr.mesh.ny)  # "flat" 2D array to take intensity data
             srwl.CalcIntFromElecField(arI1, wfr, 6, 0, 3, wfr.mesh.eStart, 0, 0)
-            srwl_uti_save_intens_ascii(arI1, wfr.mesh, filename, 0)
+            # filename = strDataFolderName + '/' + prfx.replace('XXX', '%.3d')%k
+            # srwl_uti_save_intens_ascii(arI1, wfr.mesh, filename, 0)
+            # save_wfr_2_hdf5(wfr, _filename=filename, _subgroupname="wfr", _complex_amplitude=False, _intensity=True,
+            #                 _amplitude=False, _phase=False, _overwrite=True)
+
+            scan_name = strDataFolderName.split('/')[-1]
+            filename = prfx.replace('XXX', '%.3d')%k
+            save_wfr_2_hdf5(wfr, _filename=scan_name, _subgroupname=filename, _complex_amplitude=False, _intensity=True,
+                            _amplitude=False, _phase=False, _overwrite=True)
             k+=1
 
     deltaT = time.time() - startTime
