@@ -666,7 +666,7 @@ if __name__ == '__main__':
             if k == 0:
                 pass
             else:
-                optBLp = SRWLOptC(cst_drift, ppDrift)
+                optBLp = SRWLOptC([cst_drift], [ppDrift])
                 srwl.PropagElecField(wfr, optBLp)
 
             arI1 = array('f', [0] * wfr.mesh.nx * wfr.mesh.ny)  # "flat" 2D array to take intensity data
@@ -676,7 +676,7 @@ if __name__ == '__main__':
             # save_wfr_2_hdf5(wfr, _filename=filename, _subgroupname="wfr", _complex_amplitude=False, _intensity=True,
             #                 _amplitude=False, _phase=False, _overwrite=True)
 
-            scan_name = strDataFolderName.split('/')[-1]
+            scan_name = strDataFolderName + '/' + strDataFolderName.split('/')[-1] + '.h5'
             filename = prfx.replace('XXX', '%.3d')%k
             save_wfr_2_hdf5(wfr, _filename=scan_name, _subgroupname=filename, _complex_amplitude=False, _intensity=True,
                             _amplitude=False, _phase=False, _overwrite=True)

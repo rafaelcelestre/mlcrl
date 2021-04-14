@@ -12,13 +12,13 @@ caustics = True   # enables the calculation of the 2D cuts along the optical axi
 E = 7             # Energy in keV of the simulaitons
 z = 75.557433     # position in [m] of the first optical element (X_ray lens) ~20:1 demag
 
-cst_pts = 33      # number of planes
+cst_pts = 5      # number of planes
 cst_rg = 1        # caustic range in [m]; np.linspace(-cst_rg/2, cst_rg/2, cst_pts)
 
 prfx = 'img_XXX.h5'     # file series name - please, keep the XXX
-directory = './set_XXX'  # data set number - please, keep the XXX
+directory = './example_set_XXX'  # data set number - please, keep the XXX
 
-sets = 100              # number of data sets to be generated using random Zernike polynomials
+sets = 2                # number of data sets to be generated using random Zernike polynomials
 metrology = True        # it is possible to generate datasets (20) using real metrology data; this adds to "sets"
 
 # parameters we do not need to often change
@@ -56,16 +56,17 @@ if metrology:
     lens = 2
     mtrl_files =sorted(glob.glob('./metrology/*.dat'))
 
-    for dataset in mtrl_files:
-        sd = rg.integers(1,6969)
-        dir = directory.replace('XXX', '%.3d') % k
-        cmd = 'mkdir %s' % dir
-        print(cmd)
-        os.system(cmd)
+    # for dataset in mtrl_files:
+    dataset = mtrl_files[0]
+    sd = rg.integers(1,6969)
+    dir = directory.replace('XXX', '%.3d') % k
+    cmd = 'mkdir %s' % dir
+    print(cmd)
+    os.system(cmd)
 
-        cmd = 'python synthetic_data.py ' \
-        '-s %s -p %s -c %s -e %.4f -z %e -i %d -nd %e -nb %e -l %d -sd %d -cr %.6f -cp %d -d %f -prfx %s -dir %s -m %s'\
-        % (save, plot, caustics, E, z, illum, delta, beta, lens, sd, cst_rg, cst_pts, d, prfx, dir, dataset)
-        print(cmd)
-        os.system(cmd)
-        k += 1
+    cmd = 'python synthetic_data.py ' \
+    '-s %s -p %s -c %s -e %.4f -z %e -i %d -nd %e -nb %e -l %d -sd %d -cr %.6f -cp %d -d %f -prfx %s -dir %s -m %s'\
+    % (save, plot, caustics, E, z, illum, delta, beta, lens, sd, cst_rg, cst_pts, d, prfx, dir, dataset)
+    print(cmd)
+    os.system(cmd)
+    k += 1
