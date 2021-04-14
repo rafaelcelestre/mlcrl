@@ -109,13 +109,13 @@ def get_radii(_wfr, stvt_x=50, stvt_y=50, silent=True):
     return Rx, Ry
 
 
-def get_mtrl_stats(thickness, mask=None):
+def get_mtrl_stats(thickness, _mask=None):
 
     aux_array = deepcopy(thickness)
-    if mask is None:
+    if _mask is None:
         pass
     else:
-        aux_array[np.logical_not(mask)] = np.nan
+        aux_array[np.logical_not(_mask)] = np.nan
 
     x2 = np.multiply(aux_array, aux_array)
     SumX2 = np.nansum(x2)
@@ -126,6 +126,7 @@ def get_mtrl_stats(thickness, mask=None):
 
 
 def get_mask(_mesh, _Dx, _Dy, _shape='r', _ap_or_ob='a'):
+
     X, Y = np.meshgrid(np.linspace(_mesh.xStart, _mesh.xFin, _mesh.nx), np.linspace(_mesh.yStart, _mesh.yFin, _mesh.ny))
 
     mask = np.zeros((_mesh.ny, _mesh.nx), dtype=bool)
@@ -153,6 +154,7 @@ if __name__ == '__main__':
     p.add_argument('-p', '--plots', dest='plots', metavar='BOOL', default=False, help='enables graphical display of the result')
     p.add_argument('-c', '--caustics', dest='caustics', metavar='BOOL', default=False, help='calculates the beam caustics')
     p.add_argument('-e', '--beamE', dest='beamE', metavar='NUMBER', default=0, type=float, help='beam energy in keV')
+    p.add_argument('-z', '--z', dest='z', metavar='NUMBER', default=0, type=float, help='position [m] of first optical element')
     p.add_argument('-i', '--illum', dest='illum', metavar='NUMBER', default=1, type=int, help='0 for plane phase; 1 for parabolic phase')
     p.add_argument('-nd', '--delta', dest='delta', metavar='NUMBER', default=1e-23, type=float, help='n=1-delta + i beta')
     p.add_argument('-nb', '--beta', dest='beta', metavar='NUMBER', default=1e-23, type=float, help='n=1-delta + i beta')
@@ -191,9 +193,6 @@ if __name__ == '__main__':
     string_block = 'int_' + energy + 'keV_d' + position + 'mm'
     strIntPropOutFileName = string_block + '_' + prfx
 
-    print(strIntPropOutFileName)
-
-
     #############################################################################
     #############################################################################
     # Logging all logging.infos
@@ -211,8 +210,8 @@ if __name__ == '__main__':
     ch.setFormatter(format)
     log.addHandler(ch)
 
-    fh = logging.handlers.RotatingFileHandler(os.path.join(os.getcwd(), strDataFolderName) + '/' +
-                                              dt + '_' + string_block + '.log', maxBytes=(1048576 * 5), backupCount=7)
+    fh = logging.handlers.RotatingFileHandler(strDataFolderName + '/' + dt + '_' + string_block + '.log',
+                                              maxBytes=(1048576 * 5), backupCount=7)
     fh.setFormatter(format)
     log.addHandler(fh)
 
@@ -225,7 +224,7 @@ if __name__ == '__main__':
     sampling_factor = 0 # sampling factor for adjusting nx, ny (effective if > 0)
     wavelength = srwl_uti_ph_en_conv(beamE, _in_u='keV', _out_u='m')
     k = 2*np.pi/wavelength
-    z = 75.557433 # (~20:1 demag - TODO: think of a more realsitic beamline setup ~40)
+    z = args.z
 
     # ******************************** Undulator parameters (CPMU18)
     numPer = 111			# Number of ID Periods
@@ -351,16 +350,62 @@ if __name__ == '__main__':
     # ============= Generation of figure errors ============================#
 
     if args.lens == 1:
+        rg = np.random.default_rng(args.seed)
 
-        z_coeffs = []
+        # Z1 (Zcoeffs[0]) to Z4 (Zcoeffs[3]) are set to zero
+        Zcoeffs = np.zeros([37])
 
-        oe_crl_error = b4ro.srwl_opt_setup_CRL_errors(z_coeffs, 'c', args.delta, wavelength/(4*np.pi*args.beta), CRLAph,
-                                                      CRLApv, _xc=0, _yc=0, _nx=2001, _y=2001)
+        # Z5 (Zcoeffs[4]) to Z10 (Zcoeffs[9]) are more important and have a higher weight
+        for i in range(4,10):
+            Zcoeffs[i] = rg.normal(loc=0, scale=0.5)
+        # Spherical aberration 1st order (Z11)
+        Zcoeffs[10] = rg.uniform(-2.3, 2.3)
+
+        # Z12 (Zcoeffs[11]) to Z21 (Zcoeffs[20]) and Z23 (Zcoeffs[22]) to Z36 (Zcoeffs[35]) are very low
+        for i in range(11,37):
+            Zcoeffs[i] = Zcoeffs[i] = rg.normal(loc=0, scale=0.05)
+
+        # Spherical aberration 2nd order (Z22)
+        Zcoeffs[21] = rg.uniform(-1., 1.)
+
+        # Spherical aberration 2nd order (Z22)
+        Zcoeffs[36] = rg.uniform(-0.5, 0.5)
+
+        oe_crl_error = b4ro.srwl_opt_setup_CRL_errors(Zcoeffs*1e-6, 'c', args.delta, wavelength/(4*np.pi*args.beta), CRLAph,
+                                                      CRLApv, _xc=0, _yc=0, _nx=2001, _ny=2001)
+
+        x, y, thcknss_err = b4ro.polynomial_surface_2D(_z_coeffs=Zcoeffs*1e-6, _pol='c', _apert_h=CRLAph, _apert_v=CRLApv,
+                                              _nx=2001, _ny=2001)
+        dx = x[1]-x[0]
+        dy = y[1]-y[0]
+        mesh = SRWLRadMesh()
+        mesh.eStart = -1
+        mesh.eFin = -1
+        mesh.ne = 1
+        mesh.nx = thcknss_err.shape[1]
+        mesh.xStart = - (dx * (mesh.nx - 1)) / 2.0
+        mesh.xFin = mesh.xStart + dx * (mesh.nx - 1)
+        mesh.ny = thcknss_err.shape[0]
+        mesh.yStart = - (dy * (mesh.ny - 1)) / 2.0
+        mesh.yFin = mesh.yStart + dy * (mesh.ny - 1)
+
+        mask = get_mask(mesh, _Dx=mesh.xFin-mesh.xStart, _Dy=mesh.yFin-mesh.yStart, _shape='c', _ap_or_ob='a')
+        err_rms, err_pv = get_mtrl_stats(thcknss_err*1e6, _mask=None)
+        logging.info('Fig.err. rms: ' + str(err_rms) + ' [um] and PV:' + str(err_pv) + ' [um]')
+        logging.info('Z coefficients (um): \n' + str(Zcoeffs))
+
     elif args.lens == 2:
         amp_coef = 1
-        heightProfData, HPDmesh = srwl_uti_read_intens_ascii(args.mtrl)
-        oe_crl_error = b4ro.srwl_opt_setup_CRL_error(heightProfData, HPDmesh, args.delta, wavelength/(4*np.pi*args.beta),
-                                                     _amp_coef=-amp_coef)
+        thcknss_err, mesh = srwl_uti_read_intens_ascii(args.mtrl)
+        oe_crl_error = b4ro.srwl_opt_setup_CRL_error(thcknss_err, mesh, args.delta,
+                                                     wavelength/(4*np.pi*args.beta), _amp_coef=-amp_coef)
+        Zcoeffs, fit, residues = b4wf.fit_zernike_circ(np.reshape(thcknss_err, (mesh.ny, mesh.nx)),
+                                                       nmodes=37, startmode=1, rec_zern=False)
+
+        mask = get_mask(mesh, _Dx=mesh.xFin-mesh.xStart, _Dy=mesh.yFin-mesh.yStart, _shape='c', _ap_or_ob='a')
+        err_rms, err_pv = get_mtrl_stats(thcknss_err*1e6, _mask=None)
+        logging.info('Fig.err. rms: ' + str(err_rms) + ' [um] and PV:' + str(err_pv) + ' [um]')
+        logging.info('Z coefficients (um): \n' + str(Zcoeffs))
 
     if caustics:
         if args.illum == 0:
@@ -449,69 +494,41 @@ if __name__ == '__main__':
         arP1 = array('d', [0] * wfr.mesh.nx * wfr.mesh.ny)  # "flat" array to take 2D phase data (note it should be 'd')
         srwl.CalcIntFromElecField(arP1, wfr, 0, 4, 3, wfr.mesh.eStart, 0, 0)
 
-    if save:
+    if save is True and caustics is False:
         srwl_uti_save_intens_ascii(arI1, wfr.mesh, os.path.join(os.getcwd(), strDataFolderName,  strIntPropOutFileName), 0)
 
     logging.info('>> single electron calculations: done')
 
-    '''
     if caustics:
-        logging.info('- Performing Initial Electric Field calculation ... ')
-        wftp = deepcopy(wfr)
-        IntVsZX, IntVsZY, cstcMesh, FWHMxVsZ, FWHMyVsZ = srwl_wfr_prop_drifts(wftp,(cst_range[1] - cst_range[0]) / (cst_pts),cst_pts, ppDrift_cstc, _pol=6, _type=0)
+        logging.info('- Simulating caustic scan along the optical axis ... ')
+        opt_axis = np.linspace(0, args.cst_range, cst_pts)
+        cst_drift = SRWLOptD(opt_axis[1]-opt_axis[0])
+        k = 0
+        for pts in range(cst_pts):
+            logging.info('>>>> plane %d out of %d' % (k+1, cst_pts))
+            if k == 0:
+                pass
+            else:
+                optBLp = SRWLOptC(cst_drift, ppDrift)
+                srwl.PropagElecField(wfr, optBLp)
 
-        # cstc vs X
-        mesh_cstc_x = copy(cstcMesh)
-        mesh_cstc_x.xStart = cst_range[0]
-        mesh_cstc_x.xFin = cst_range[1]
-        mesh_cstc_x.nx = cst_pts + 1
-        mesh_cstc_x.yStart = cstcMesh.xStart
-        mesh_cstc_x.yFin = cstcMesh.xFin
-        mesh_cstc_x.ny = cstcMesh.nx
+            filename = strDataFolderName + '/' + prfx.replace('XXX', '%.3d')%k
+            arI1 = array('f', [0] * wfr.mesh.nx * wfr.mesh.ny)  # "flat" 2D array to take intensity data
+            srwl.CalcIntFromElecField(arI1, wfr, 6, 0, 3, wfr.mesh.eStart, 0, 0)
+            srwl_uti_save_intens_ascii(arI1, wfr.mesh, filename, 0)
+            k+=1
 
-        # cstc vs Y
-        mesh_cstc_y = copy(cstcMesh)
-        mesh_cstc_y.xStart = cst_range[0]
-        mesh_cstc_y.xFin = cst_range[1]
-        mesh_cstc_y.nx = cst_pts + 1
-        mesh_cstc_y.yStart = cstcMesh.yStart
-        mesh_cstc_y.yFin = cstcMesh.yFin
-        mesh_cstc_y.ny = cstcMesh.ny
-
-        if save:
-            srwl_uti_save_intens_ascii(IntVsZX, mesh_cstc_x, os.path.join(os.getcwd(), strDataFolderName,
-                                                                          strIntPropOutFileName.replace('_intensity',
-                                                                                                        '_intensity_cstc_X')), 0)
-
-            srwl_uti_save_intens_ascii(IntVsZY, mesh_cstc_y, os.path.join(os.getcwd(), strDataFolderName,
-                                                                          strIntPropOutFileName.replace('_intensity',
-                                                                                                        '_intensity_cstc_Y')), 0)
-
-        logging.info('>> caustic calculations: done')
-    '''
     deltaT = time.time() - startTime
     hours, minutes = divmod(deltaT, 3600)
     minutes, seconds = divmod(minutes, 60)
     logging.info(">>>> Elapsed time: " + str(int(hours)) + "h " + str(int(minutes)) + "min " + str(seconds) + "s ") if (srwl_uti_proc_is_master()) else 0
 
-    if plots is True:
+    if plots is True and caustics is False:
         # ********************************Electrical field intensity and phase after propagation
         plotMesh1x = [1E6 * wfr.mesh.xStart, 1E6 * wfr.mesh.xFin, wfr.mesh.nx]
         plotMesh1y = [1E6 * wfr.mesh.yStart, 1E6 * wfr.mesh.yFin, wfr.mesh.ny]
         uti_plot2d(arI1, plotMesh1x, plotMesh1y,['Horizontal Position [um]', 'Vertical Position [um]', 'Intensity After Propagation'])
         uti_plot2d(arP1, plotMesh1x, plotMesh1y,['Horizontal Position [um]', 'Vertical Position [um]', 'Phase After Propagation'])
-        #
-        # if caustics:
-        #     if plots:
-        #         plotMesh1x = [1E6 * mesh_cstc_x.xStart, 1E6 * mesh_cstc_x.xFin, mesh_cstc_x.nx]
-        #         plotMesh1y = [1E6 * mesh_cstc_x.yStart, 1E6 * mesh_cstc_x.yFin, mesh_cstc_x.ny]
-        #         uti_plot2d(IntVsZX, plotMesh1x, plotMesh1y,
-        #                    ['Horizontal Position [um]', 'Vertical Position [um]', 'Caustic vs X'])
-        #
-        #         plotMesh1x = [1E6 * mesh_cstc_y.xStart, 1E6 * mesh_cstc_y.xFin, mesh_cstc_y.nx]
-        #         plotMesh1y = [1E6 * mesh_cstc_y.yStart, 1E6 * mesh_cstc_y.yFin, mesh_cstc_y.ny]
-        #         uti_plot2d(IntVsZY, plotMesh1x, plotMesh1y,
-        #                    ['Horizontal Position [um]', 'Vertical Position [um]', 'Caustic vs Y'])
         uti_plot_show()
 
 
