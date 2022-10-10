@@ -293,7 +293,30 @@ def random_zernike_wavefront(amplitude_ranges, order='noll', rng=None):
         """
         if rng is None: rng = np.random
         amplitude_ranges = ensure_dict(amplitude_ranges, order)
+        print(">>>", amplitude_ranges, amplitude_ranges.values(), amplitude_ranges.items())
+
+
         all((np.isscalar(v) and v>=0) or (isinstance(v,(tuple,list)) and len(v)==2) for v in amplitude_ranges.values()) or _raise(ValueError())
         amplitude_ranges = {k:((-v,v) if np.isscalar(v) else v) for k,v in amplitude_ranges.items()}
         all(v[0]<=v[1] for v in amplitude_ranges.values()) or _raise(ValueError("Lower bound is expected to be less than the upper bound"))
         return ZernikeWavefront({k:rng.uniform(*v) for k,v in amplitude_ranges.items()}, order=order)
+
+
+#srio
+    # :param zernike_amplitude_ranges: dictionary or list, the values should either a scalar indicating the absolute magnitude
+    #         or a tuple with upper and lower bound, default is {'vertical coma': (-0.2,0.2)}
+
+if __name__ == "__main__":
+    # see more examples in phasenet/notebooks/Wavefront
+    import matplotlib.pylab as plt
+
+    f = random_zernike_wavefront([(0, 0), (-1, 1), (1, 2)], order = 'ansi')
+    print(f.zernikes)
+
+    print(f.amplitudes_noll)
+    print(f.amplitudes_ansi)
+
+    plt.imshow(f.polynomial(512));
+    plt.colorbar();
+    plt.axis('off');
+    plt.show()
