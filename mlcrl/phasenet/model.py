@@ -4,7 +4,9 @@ import warnings
 
 import keras
 import keras.backend as K
-from tensorflow.keras.layers import *
+from tensorflow.keras.layers import Input, Conv3D, MaxPooling3D, Flatten, Dense
+from tensorflow.keras.layers import GlobalAveragePooling3D, BatchNormalization, Activation, Add
+
 from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import ReduceLROnPlateau, TensorBoard
@@ -95,6 +97,7 @@ class Data:
     def _single_psf(self):
         phi = random_zernike_wavefront(self.amplitude_ranges, order=self.order)
         psf = self.psfgen.incoherent_psf(phi, normed=self.normed)
+
 
         if self.phantom is not None:
             self.phantom.generate()
