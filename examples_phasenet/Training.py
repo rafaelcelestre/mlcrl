@@ -3,9 +3,6 @@
 
 # In[5]:
 
-from srxraylib.plot.gol import set_qt
-set_qt()
-
 
 from mlcrl.phasenet.model import PhaseNet, Config, Data
 from tqdm import tqdm
@@ -26,8 +23,6 @@ hlp = '### ' + Config.__doc__
 def _replace(s):
     return f"  \n\n`{s.group(1).strip()}`: "
 hlp = re.sub(r'\n\s*:param([^:]+):', _replace, hlp)
-print(hlp)
-# print(Markdown(hlp))
 # display(Markdown(hlp))
 
 
@@ -121,8 +116,8 @@ plt.plot(amps_pred[ind], '--', marker='*', label='pred')
 plt.xlabel('test psf')
 plt.ylabel(f'amplitude {tuple(model.config.zernike_amplitude_ranges.keys())[0]}')
 plt.legend()
-plt.show()
 None;
+plt.show()
 
 
 # In[ ]:

@@ -4,18 +4,13 @@
 # In[20]:
 
 
-from mlcrl.phasenet.model import PhaseNet
-from mlcrl.phasenet.zernike import ZernikeWavefront
+from phasenet.model import PhaseNet
+from phasenet.zernike import ZernikeWavefront
 from csbdeep.utils import normalize, download_and_extract_zip_file
 import matplotlib.pyplot as plt
 from pathlib import Path
 from tifffile import imread
 import numpy as np
-
-
-
-from srxraylib.plot.gol import set_qt
-set_qt()
 
 
 # ## Load model

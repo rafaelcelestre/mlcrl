@@ -3,9 +3,6 @@
 
 # In[1]:
 
-from srxraylib.plot.gol import set_qt
-set_qt()
-
 
 from mlcrl.phasenet.zernike import ZernikeWavefront, random_zernike_wavefront
 import matplotlib.pyplot as plt
@@ -17,76 +14,80 @@ import numpy as np
 # In[2]:
 
 
-# list of amplitudes starting from piston
-amp = np.random.uniform(-1,1,4)
-f = ZernikeWavefront(amp, order='ansi') 
-# display(f.zernikes)
-print(">>>>>>", f.zernikes)
+# list of amplitudes starting from piston  #srio: use 4 first polynomials
+if False:
+    amp = np.random.uniform(-1,1,4)
+    f = ZernikeWavefront(amp, order='ansi')
+    print(">>> f.zernikes", f.zernikes)
+    print(">>> f.amplitudes_noll", f.amplitudes_noll)
+    print(">>> f.amplitudes_ansi", f.amplitudes_ansi)
 
-print(f.amplitudes_noll)
-print(f.amplitudes_ansi)
+    plt.imshow(f.polynomial(512)); plt.colorbar(); plt.axis('off');
+    plt.show()
 
-plt.imshow(f.polynomial(512)); plt.colorbar(); plt.axis('off');
-plt.show()
 
 # In[3]:
 
 
 # dictionary of amplitudes
-f = ZernikeWavefront({3:0.1, 5:0.1}, order='ansi') 
-# display(f.zernikes)
-print(">>>>>>", f.zernikes)
+if False:
+    f = ZernikeWavefront({3:0.1, 5:0.1}, order='ansi')
+    print(f.zernikes)
 
-print(f.amplitudes_noll)
-print(f.amplitudes_ansi)
+    print(f.amplitudes_noll)
+    print(f.amplitudes_ansi)
 
-plt.imshow(f.polynomial(512)); plt.colorbar(); plt.axis('off');
+    plt.imshow(f.polynomial(512)); plt.colorbar(); plt.axis('off');
 
-plt.show()
+    plt.show()
+
+
 
 # ## A random wavefront can be created by giving an absolute amplitude range as an absolute number or a tuple for different Zernike modes
 
 # In[4]:
 
 
-# random wavefront from a list of absolute amplitudes
-f = random_zernike_wavefront([1,1,1,1], order='ansi')
-# display(f.zernikes)
-print(">>>>>>", f.zernikes)
+if False:
+    # random wavefront from a list of absolute amplitudes
+    f = random_zernike_wavefront([1,1,1,1], order='ansi')
+    print(f.zernikes)
 
-print(f.amplitudes_noll)
-print(f.amplitudes_ansi)
+    print(f.amplitudes_noll)
+    print(f.amplitudes_ansi)
 
-plt.imshow(f.polynomial(512)); plt.colorbar(); plt.axis('off');
-
-plt.show()
-
-# In[5]:
-
-
+    plt.imshow(f.polynomial(512)); plt.colorbar(); plt.axis('off');
+    plt.show()
+#
+#
+# # In[5]:
+#
+#
 # random wavefront from a list of amplitude ranges given in a tuple
-f = random_zernike_wavefront([(0,0),(-1,1),(1,2)], order='ansi')
-# display(f.zernikes)
-print(">>>>>>", f.zernikes)
+if False:
+    f = random_zernike_wavefront([(0,0),(-1,1),(1,2)], order='ansi')
+    print(f.zernikes)
 
-print(f.amplitudes_noll)
-print(f.amplitudes_ansi)
+    print(f.amplitudes_noll)
+    print(f.amplitudes_ansi)
 
-plt.imshow(f.polynomial(512)); plt.colorbar(); plt.axis('off');
-plt.title(repr(f.zernikes))
-plt.show()
+    plt.imshow(f.polynomial(512)); plt.colorbar(); plt.axis('off');
+    plt.show()
 
-# In[6]:
+#
+#
+# # In[6]:
+#
+#
+# # random wavefront from a dictionary with the range given in a tuple
+if True:
+    f = random_zernike_wavefront({'defocus':(1,2), (3,-3):5})
+    print(f.zernikes)
 
+    print(f.amplitudes_noll)
+    print(f.amplitudes_ansi)
 
-# random wavefront from a dictionary with the range given in a tuple
-f = random_zernike_wavefront({'defocus':(1,2), (3,-3):5})
-# display(f.zernikes)
-print(">>>>>>", f.zernikes)
+    plt.imshow(f.polynomial(512)); plt.colorbar(); plt.axis('off');
 
-print(f.amplitudes_noll)
-print(f.amplitudes_ansi)
-
-plt.imshow(f.polynomial(512)); plt.colorbar(); plt.axis('off');
-
-plt.show()
+    plt.show()
+#

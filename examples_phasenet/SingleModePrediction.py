@@ -2,12 +2,10 @@
 # coding: utf-8
 
 # In[2]:
-from srxraylib.plot.gol import set_qt
-set_qt()
 
 
-from mlcrl.phasenet.model import PhaseNet
-from mlcrl.phasenet.zernike import ZernikeWavefront
+from phasenet.model import PhaseNet
+from phasenet.zernike import ZernikeWavefront
 from csbdeep.utils import normalize, download_and_extract_zip_file
 import matplotlib.pyplot as plt
 from pathlib import Path
@@ -139,7 +137,6 @@ plt.xticks(range(1, len(labels) + 1), labels)
 ax_1.set_ylim(lower_limit,upper_limit)
 ax_1.set_ylabel("Predicted amplitude / $\mu m$", size=8, labelpad=-0.5);
 
-plt.show()
 None;
 
 

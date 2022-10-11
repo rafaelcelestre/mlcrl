@@ -3,9 +3,6 @@
 
 # In[1]:
 
-from srxraylib.plot.gol import set_qt
-set_qt()
-
 
 from phasenet.zernike import ZernikeWavefront
 from phasenet.psf import PsfGenerator3D
@@ -55,7 +52,6 @@ for i in range(3):
     plt.axis('OFF');
 None;
 
-plt.show()
 
 # Visualize
 
@@ -70,6 +66,5 @@ N = h1.shape[0]
 plt.subplot(132); plt.imshow(h1[N//2]);   plt.title('XY section'); plt.colorbar()
 plt.subplot(133); plt.imshow(h1[:,N//2]); plt.title('ZX section'); plt.colorbar()
 plt.tight_layout()
-plt.show()
 None;
 
