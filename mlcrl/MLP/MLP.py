@@ -31,7 +31,9 @@ class MLP:
         # The network architecture defined in the net_arch list does not include the number of inputs nor the number of outputs. The lines below updates the net_arch list to include these 2 numbers.
         in_size = x.shape[1]
         if y.ndim == 1:
-            out_size = 1
+            # srio debugging
+            raise Exception("Please use double list [[]] for samples x outputs")
+            # out_size = y.size # 1  srio debugging
         else:
             out_size = y.shape[1]
 
@@ -301,7 +303,10 @@ class MLP:
         # Updating the weights between the last hidden layer and the output neurons.
         for out_neuron_idx in range(num_outputs):
             w[-1][out_neuron_idx] = w[-1][out_neuron_idx] - layer_weights_grads[0][out_neuron_idx] * learning_rate
-            b[-1][out_neuron_idx] = b[-1][out_neuron_idx] - layer_weights_derivs[0] * output_layer_derivs[out_neuron_idx] * learning_rate
+            # print(">>>>>",b[-1][out_neuron_idx] , layer_weights_derivs[0] , output_layer_derivs[out_neuron_idx] , learning_rate )
+            # changed by srio  - who knows if this is correct...
+            # b[-1][out_neuron_idx] = b[-1][out_neuron_idx] - layer_weights_derivs[0] * output_layer_derivs[out_neuron_idx] * learning_rate
+            b[-1][out_neuron_idx] = b[-1][out_neuron_idx] - layer_weights_derivs[0][out_neuron_idx] * output_layer_derivs[out_neuron_idx] * learning_rate
 
         SOPs_ACTIVs_deriv_individual = []
         deriv_chain_final = []
@@ -511,7 +516,7 @@ class MLP:
             prediction: The predicted output for the current sample.
         """
         in_size = trained_ann["in_size"]
-        print(">>>> in_size", in_size)
+        # print(">>>> in_size", in_size)
         if x.ndim == 1:
             if x.shape[0] != in_size:
                 print("Input shape ", x.shape[0], " does not match the expected network input shape ", in_size)
