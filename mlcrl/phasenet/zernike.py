@@ -184,6 +184,15 @@ class Zernike:
         return self.phase(*rho_theta(int(size)), normed=normed, outside=outside)
 
 
+    def polynomial_vertical(self, size, normed=True, outside=np.nan):  # added by srio
+        np.isscalar(size) and int(size) > 0 or _raise(ValueError())
+
+        rho = np.linspace(-1.0,1.0,size)
+        w = nm_polynomial(self.n, self.m, rho, 0.0, normed=bool(normed))
+        if outside is not None:
+            w[nm_polynomial(0, 0, rho, 0.0, normed=False) < 1] = outside
+        return w
+
     def phase(self, rho, theta, normed=True, outside=None):
 
         """

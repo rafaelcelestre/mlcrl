@@ -7,19 +7,21 @@ import tensorflow as tf
 
 print ('TensorFlow version: ' + tf.__version__)
 
-def myfunc(x, noise=1):
-    if noise:
-        return 0.1*x*np.cos(x) + 0.1*np.random.normal(size=x.size)
-    else:
-        return 0.1 * x * np.cos(x)
-
-
+def myfunc(x, noise=0.0):
+    y = 0.1 * x *np.cos(x)
     # return np.cos(x)
+    if noise > 0.0:
+        y += noise * np.random.normal(size=x.size)
+
+    return y
+
+
+
 
 
 # Create noisy data
 x_data = np.linspace(-10, 10, num=1000)
-y_data = myfunc(x_data)
+y_data = myfunc(x_data, noise=0.1)
 print('Data created successfully')
 
 
