@@ -4,7 +4,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from srxraylib.plot.gol import plot, plot_table
 
-def create_1d_sampled_profiles(nsamples, size=128, noll=[6, 8, 10, 11, 12, 14, 22, 37], factor=1.0, do_plot=False):
+def create_1d_sampled_profiles(nsamples, size=128, noll=[6, 8, 10, 11, 12, 14, 22, 37], factor=1.0,
+                               seed=69, do_plot=False):
 
     Y = np.zeros((size, nsamples))
     C = np.zeros((len(noll), nsamples))
@@ -66,9 +67,42 @@ if __name__ == "__main__":
             else:
                 a.set_title("Noll: %d (%d,%d)" % (i+1, z.n, z.m))
             a.axis('off')
-            print(">>>>>> i.(i-1) = ", np.nansum((z_old * w)) )
+            # print(">>>>>> i.(i-1) = ", np.nansum((z_old * w)) )
 
         plt.show()
+
+
+    #
+    # check normalization 2D
+    #
+    if False:
+        noll = [6, 8, 10, 11, 12, 14, 22, 37]
+        nnoll = len(noll)
+        size = 128 * 4
+        for i in range(nnoll):
+            for j in range(nnoll):
+                z1 = Zernike(noll[i], order='noll')
+                z2 = Zernike(noll[j], order='noll')
+                tmp = np.nansum(z1.polynomial(size=size) * z2.polynomial(size=size))/size**2
+                if np.abs(tmp) < 1e-12:
+                    tmp = 0
+                print(">>> norm noll %d  %d: %g" % (noll[i],noll[j], tmp))
+
+    #
+    # check NON-normalization 1D
+    #
+    if False:
+        size = 128 * 4
+        noll = [6, 8, 10, 11, 12, 14, 22, 37]
+        nnoll = len(noll)
+        for i in range(nnoll):
+            for j in range(nnoll):
+                z1 = Zernike(noll[i], order='noll')
+                z2 = Zernike(noll[j], order='noll')
+                tmp = np.nansum(z1.polynomial_vertical(size=size) * z2.polynomial_vertical(size=size))/size
+                if np.abs(tmp) < 1e-12:
+                    tmp = 0
+                print(">>> norm V profile noll %d  %d: %g" % (noll[i],noll[j], tmp))
 
 
     #
@@ -104,7 +138,7 @@ if __name__ == "__main__":
     seed = 69  # seed for generation of the random Zernike profiles
     noll = [6, 8, 10, 11, 12, 14, 22, 37]
 
-    C, Y  = create_1d_sampled_profiles(nsamples, size=size, noll=noll, factor=5.0, do_plot=0)
+    C, Y  = create_1d_sampled_profiles(nsamples, size=size, noll=noll, factor=5.0, do_plot=0, seed=seed)
 
 
     print(Y.shape,C)
