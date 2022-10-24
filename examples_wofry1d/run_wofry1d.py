@@ -17,7 +17,7 @@ from wofryimpl.propagator.propagators1D.integral import Integral1D
 from wofryimpl.propagator.propagators1D.fresnel_zoom import FresnelZoom1D
 from wofryimpl.propagator.propagators1D.fresnel_zoom_scaling_theorem import FresnelZoomScaling1D
 
-from srxraylib.plot.gol import plot, plot_image, plot_show
+from srxraylib.plot.gol import plot, plot_image, plot_show, plot_table
 plot_from_oe = 100 # set to a large number to avoid plots
 
 
@@ -57,13 +57,7 @@ def run_source():
 def run_beamline(output_wavefront, file_with_thickness_mesh="tmp_ml0000.dat", distance=3.591600):
     ##########  OPTICAL SYSTEM ##########
 
-
-
-
-
     ##########  OPTICAL ELEMENT NUMBER 1 ##########
-
-
 
     input_wavefront = output_wavefront.duplicate()
     from wofryimpl.beamline.optical_elements.ideal_elements.screen import WOScreen1D
@@ -76,10 +70,13 @@ def run_beamline(output_wavefront, file_with_thickness_mesh="tmp_ml0000.dat", di
     #
     #
     propagation_elements = PropagationElements()
-    beamline_element = BeamlineElement(optical_element=optical_element,    coordinates=ElementCoordinates(p=36.000000,    q=0.000000,    angle_radial=numpy.radians(0.000000),    angle_azimuthal=numpy.radians(0.000000)))
+    beamline_element = BeamlineElement(optical_element=optical_element,
+                                       coordinates=ElementCoordinates(p=36.000000, q=0.000000,
+                                                                      angle_radial=numpy.radians(0.000000),
+                                                                      angle_azimuthal=numpy.radians(0.000000)))
     propagation_elements.add_beamline_element(beamline_element)
-    propagation_parameters = PropagationParameters(wavefront=input_wavefront,    propagation_elements = propagation_elements)
-    #self.set_additional_parameters(propagation_parameters)
+    propagation_parameters = PropagationParameters(wavefront=input_wavefront, propagation_elements=propagation_elements)
+    # self.set_additional_parameters(propagation_parameters)
     #
     propagation_parameters.set_additional_parameters('magnification_x', 10.0)
     #
@@ -88,43 +85,39 @@ def run_beamline(output_wavefront, file_with_thickness_mesh="tmp_ml0000.dat", di
         propagator.add_propagator(FresnelZoom1D())
     except:
         pass
-    output_wavefront = propagator.do_propagation(propagation_parameters=propagation_parameters,    handler_name='FRESNEL_ZOOM_1D')
-
+    output_wavefront = propagator.do_propagation(propagation_parameters=propagation_parameters,
+                                                 handler_name='FRESNEL_ZOOM_1D')
 
     #
-    #---- plots -----
+    # ---- plots -----
     #
-    if plot_from_oe <= 1: plot(output_wavefront.get_abscissas(),output_wavefront.get_intensity(),title='OPTICAL ELEMENT NR 1')
-
+    if plot_from_oe <= 1: plot(output_wavefront.get_abscissas(), output_wavefront.get_intensity(),
+                               title='OPTICAL ELEMENT NR 1')
 
     ##########  OPTICAL ELEMENT NUMBER 2 ##########
 
-
-
     input_wavefront = output_wavefront.duplicate()
     from syned.beamline.shape import Rectangle
-    boundary_shape=Rectangle(-0.5, 0.5, -0.5, 0.5)
+    boundary_shape = Rectangle(-0.5, 0.5, -0.5, 0.5)
     from wofryimpl.beamline.optical_elements.absorbers.slit import WOSlit1D
     optical_element = WOSlit1D(boundary_shape=boundary_shape)
 
     # no drift in this element
     output_wavefront = optical_element.applyOpticalElement(input_wavefront)
 
-
     #
-    #---- plots -----
+    # ---- plots -----
     #
-    if plot_from_oe <= 2: plot(output_wavefront.get_abscissas(),output_wavefront.get_intensity(),title='OPTICAL ELEMENT NR 2')
-
+    if plot_from_oe <= 2: plot(output_wavefront.get_abscissas(), output_wavefront.get_intensity(),
+                               title='OPTICAL ELEMENT NR 2')
 
     ##########  OPTICAL ELEMENT NUMBER 3 ##########
 
-
-
     input_wavefront = output_wavefront.duplicate()
-    from wofryimpl.beamline.optical_elements.ideal_elements.screen import WOScreen1D
-
-    optical_element = WOScreen1D()
+    from syned.beamline.shape import Rectangle
+    boundary_shape = Rectangle(-0.5, 0.5, -0.5, 0.5)
+    from wofryimpl.beamline.optical_elements.absorbers.slit import WOSlit1D
+    optical_element = WOSlit1D(boundary_shape=boundary_shape)
 
     # drift_before 29 m
     #
@@ -132,10 +125,13 @@ def run_beamline(output_wavefront, file_with_thickness_mesh="tmp_ml0000.dat", di
     #
     #
     propagation_elements = PropagationElements()
-    beamline_element = BeamlineElement(optical_element=optical_element,    coordinates=ElementCoordinates(p=29.000000,    q=0.000000,    angle_radial=numpy.radians(0.000000),    angle_azimuthal=numpy.radians(0.000000)))
+    beamline_element = BeamlineElement(optical_element=optical_element,
+                                       coordinates=ElementCoordinates(p=29.000000, q=0.000000,
+                                                                      angle_radial=numpy.radians(0.000000),
+                                                                      angle_azimuthal=numpy.radians(0.000000)))
     propagation_elements.add_beamline_element(beamline_element)
-    propagation_parameters = PropagationParameters(wavefront=input_wavefront,    propagation_elements = propagation_elements)
-    #self.set_additional_parameters(propagation_parameters)
+    propagation_parameters = PropagationParameters(wavefront=input_wavefront, propagation_elements=propagation_elements)
+    # self.set_additional_parameters(propagation_parameters)
     #
     propagation_parameters.set_additional_parameters('magnification_x', 1.5)
     #
@@ -144,18 +140,16 @@ def run_beamline(output_wavefront, file_with_thickness_mesh="tmp_ml0000.dat", di
         propagator.add_propagator(FresnelZoom1D())
     except:
         pass
-    output_wavefront = propagator.do_propagation(propagation_parameters=propagation_parameters,    handler_name='FRESNEL_ZOOM_1D')
-
+    output_wavefront = propagator.do_propagation(propagation_parameters=propagation_parameters,
+                                                 handler_name='FRESNEL_ZOOM_1D')
 
     #
-    #---- plots -----
+    # ---- plots -----
     #
-    if plot_from_oe <= 3: plot(output_wavefront.get_abscissas(),output_wavefront.get_intensity(),title='OPTICAL ELEMENT NR 3')
-
+    if plot_from_oe <= 3: plot(output_wavefront.get_abscissas(), output_wavefront.get_intensity(),
+                               title='OPTICAL ELEMENT NR 3')
 
     ##########  OPTICAL ELEMENT NUMBER 4 ##########
-
-
 
     input_wavefront = output_wavefront.duplicate()
     from wofryimpl.beamline.optical_elements.refractors.lens import WOLens1D
@@ -169,9 +163,9 @@ def run_beamline(output_wavefront, file_with_thickness_mesh="tmp_ml0000.dat", di
         material='Be',
         number_of_curved_surfaces=2,
         n_lenses=1,
-        error_flag=0,
-        error_file='<none>',
-        error_edge_management=0,
+        error_flag=1,
+        error_file=file_with_thickness_mesh,
+        error_edge_management=1,
         write_profile_flag=0,
         write_profile='profile1D.dat',
         mis_flag=0,
@@ -188,35 +182,13 @@ def run_beamline(output_wavefront, file_with_thickness_mesh="tmp_ml0000.dat", di
     # no drift in this element
     output_wavefront = optical_element.applyOpticalElement(input_wavefront)
 
-
     #
-    #---- plots -----
+    # ---- plots -----
     #
-    if plot_from_oe <= 4: plot(output_wavefront.get_abscissas(),output_wavefront.get_intensity(),title='OPTICAL ELEMENT NR 4')
-
+    if plot_from_oe <= 4: plot(output_wavefront.get_abscissas(), output_wavefront.get_intensity(),
+                               title='OPTICAL ELEMENT NR 4')
 
     ##########  OPTICAL ELEMENT NUMBER 5 ##########
-
-
-
-    input_wavefront = output_wavefront.duplicate()
-    from wofryimpl.beamline.optical_elements.refractors.thin_object import WOThinObject1D
-
-    optical_element = WOThinObject1D(name='',file_with_thickness_mesh=file_with_thickness_mesh,material='Be')
-
-    # no drift in this element
-    output_wavefront = optical_element.applyOpticalElement(input_wavefront)
-
-
-    #
-    #---- plots -----
-    #
-    if plot_from_oe <= 5: plot(output_wavefront.get_abscissas(),output_wavefront.get_intensity(),title='OPTICAL ELEMENT NR 5')
-
-
-    ##########  OPTICAL ELEMENT NUMBER 6 ##########
-
-
 
     input_wavefront = output_wavefront.duplicate()
     from wofryimpl.beamline.optical_elements.ideal_elements.screen import WOScreen1D
@@ -226,16 +198,13 @@ def run_beamline(output_wavefront, file_with_thickness_mesh="tmp_ml0000.dat", di
     # no drift in this element
     output_wavefront = optical_element.applyOpticalElement(input_wavefront)
 
-
     #
-    #---- plots -----
+    # ---- plots -----
     #
-    if plot_from_oe <= 6: plot(output_wavefront.get_abscissas(),output_wavefront.get_intensity(),title='OPTICAL ELEMENT NR 6')
+    if plot_from_oe <= 5: plot(output_wavefront.get_abscissas(), output_wavefront.get_intensity(),
+                               title='OPTICAL ELEMENT NR 5')
 
-
-    ##########  OPTICAL ELEMENT NUMBER 7 ##########
-
-
+    ##########  OPTICAL ELEMENT NUMBER 6 ##########
 
     input_wavefront = output_wavefront.duplicate()
     from wofryimpl.beamline.optical_elements.ideal_elements.screen import WOScreen1D
@@ -248,30 +217,31 @@ def run_beamline(output_wavefront, file_with_thickness_mesh="tmp_ml0000.dat", di
     #
     #
     propagation_elements = PropagationElements()
-    beamline_element = BeamlineElement(optical_element=optical_element,    coordinates=ElementCoordinates(p=distance,    q=0.000000,    angle_radial=numpy.radians(0.000000),    angle_azimuthal=numpy.radians(0.000000)))
+    beamline_element = BeamlineElement(optical_element=optical_element,
+                                       coordinates=ElementCoordinates(p=distance, q=0.000000,
+                                                                      angle_radial=numpy.radians(0.000000),
+                                                                      angle_azimuthal=numpy.radians(0.000000)))
     propagation_elements.add_beamline_element(beamline_element)
-    propagation_parameters = PropagationParameters(wavefront=input_wavefront,    propagation_elements = propagation_elements)
-    #self.set_additional_parameters(propagation_parameters)
+    propagation_parameters = PropagationParameters(wavefront=input_wavefront, propagation_elements=propagation_elements)
+    # self.set_additional_parameters(propagation_parameters)
     #
     propagation_parameters.set_additional_parameters('magnification_x', 0.1)
-    propagation_parameters.set_additional_parameters('magnification_N', 1.0)
     #
     propagator = PropagationManager.Instance()
     try:
-        propagator.add_propagator(Integral1D())
+        propagator.add_propagator(FresnelZoom1D())
     except:
         pass
-    output_wavefront = propagator.do_propagation(propagation_parameters=propagation_parameters,    handler_name='FRESNEL_ZOOM_1D')
+    output_wavefront = propagator.do_propagation(propagation_parameters=propagation_parameters,
+                                                 handler_name='FRESNEL_ZOOM_1D')
 
     #
     # ---- plots -----
     #
+    if plot_from_oe <= 6: plot(output_wavefront.get_abscissas(), output_wavefront.get_intensity(),
+                               title='OPTICAL ELEMENT NR 6')
 
-    if plot_from_oe <= 7: plot(output_wavefront.get_abscissas(), output_wavefront.get_intensity(),
-                               title='OPTICAL ELEMENT NR 7')
     return output_wavefront
-
-
 
 if __name__ == "__main__":
     import matplotlib.pylab as plt
@@ -286,16 +256,19 @@ if __name__ == "__main__":
     distance = numpy.linspace(distance0-0.5*delta, distance0+0.5*delta, npoints)
 
     do_intermediate_plot = 0
-    do_plot = 1
+    do_plot = 0
 
-    nsamples = 20
-    nsamples_plot = 8
+    nsamples = 1000
+    nsamples_plot = 25
 
-
+    dir = "/users/srio/Oasys/ML_TRAIN/"
+    root = "tmp_ml"
 
     for nn in range(nsamples):
         for i in range(npoints):
-            output_wavefront = run_beamline(src, file_with_thickness_mesh="tmp_ml%04d.dat" % nn, distance=distance[i])
+            file_with_thickness_mesh = "%s%s%06d.dat" % (dir, root, nn)
+            output_wavefront = run_beamline(src, file_with_thickness_mesh=file_with_thickness_mesh, distance=distance[i])
+
             if do_intermediate_plot: plot(output_wavefront.get_abscissas(),output_wavefront.get_intensity(),
                  title='LAST OPTICAL ELEMENT d=%s' % (distance[i]))
 
@@ -309,6 +282,7 @@ if __name__ == "__main__":
 
         ZZ[nn,:,:] = Z
 
+
     #
     # plot
     #
@@ -318,7 +292,8 @@ if __name__ == "__main__":
         A = ax.ravel()
 
         for nn in range(nsamples_plot):
-            tmp = numpy.loadtxt("tmp_ml%04d.dat" % nn)
+            file_with_thickness_mesh = "%s%s%06d.dat" % (dir, root, nn)
+            tmp = numpy.loadtxt(file_with_thickness_mesh)
 
             if do_plot:
                 iplot += 1
@@ -336,3 +311,39 @@ if __name__ == "__main__":
 
 
         if do_plot: plt.show()
+
+        print(x.shape, ZZ.shape)
+        plot_table(x * 1e6, ZZ[:, 0, :], legend=numpy.arange(nsamples), title="closer")
+        plot_table(x * 1e6, ZZ[:,ZZ.shape[1]//2,:], legend=numpy.arange(nsamples), title="center")
+        plot_table(x * 1e6, ZZ[:, -1, :], legend=numpy.arange(nsamples), title="farer")
+
+    # write h5
+    from srxraylib.util.h5_simple_writer import H5SimpleWriter
+    h5_file = "%s%s.h5" % (dir, root)
+    h5w = H5SimpleWriter.initialize_file(h5_file,creator="h5_basic_writer.py")
+
+    for i in range(nsamples):
+        # create the entry for this iteration and set default plot to "Wintensity"
+        h5w.create_entry("sample%06d"%i,nx_default="Intensity")
+
+
+        file_with_info = "%s%s%06d.txt" % (dir, root, i)
+        tmp = numpy.loadtxt(file_with_info)
+        h5w.add_key("Noll-Zcoeff-GScoeff",
+                    tmp,
+                    entry_name="sample%06d"%i)
+
+
+        # add the images at this entry level
+        h5w.add_image(ZZ[i,:,:],distance,1e6*x,
+                     entry_name="sample%06d"%i,image_name="Intensity",
+                     title_x="distance [m]",title_y="x [um]")
+
+        # add deformation profile
+        file_with_thickness_mesh = "%s%s%06d.dat" % (dir, root, i)
+        tmp = numpy.loadtxt(file_with_thickness_mesh)
+        h5w.add_dataset(1e6*tmp[:,0],1e6*tmp[:,1],
+                    entry_name="sample%06d"%i,dataset_name="profile",
+                    title_x="X [um]",title_y="Y[um]")
+
+    print("File %s written to disk." % h5_file)
