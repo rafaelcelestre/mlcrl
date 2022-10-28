@@ -299,6 +299,13 @@ class PhaseNet(BaseModel):
 
     def _convnet(self, input_shape, output_size, kernel_size, activation, padding, pool_size):
 
+        print(">>> input_shape", input_shape)
+        print(">>> output_size", output_size)
+        print(">>> kernel_size", kernel_size)
+        print(">>> activation", activation)
+        print(">>> padding", padding)
+        print(">>> pool_size", pool_size)
+
         inp = Input(name='X', shape=input_shape)
         t = Conv3D(8, name='conv1', kernel_size=kernel_size, activation=activation, padding=padding)(inp)
         t = Conv3D(8, name='conv2', kernel_size=kernel_size, activation=activation, padding=padding)(t)

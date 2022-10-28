@@ -274,3 +274,109 @@ Multiclass, single-label classification   softmax                  categorical_c
 Multiclass, multilabel classification     sigmoid                  binary_crossentropy
 Regression to arbitrary values            None                     mse
 Regression to values between 0 and 1      sigmoid                  mse or binary_crossentropy
+
+Ch 5 CNN
+========
+
+model.add(layers.Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 1)))
+conv2d_1 (Conv2D) (None, 26, 26, 32) 320
+
+In the MNIST example, the first convolution layer takes a feature map of size (28,
+28, 1) and outputs a feature map of size (26, 26, 32) : it computes 32 filters over its
+input. Each of these 32 output channels contains a 26 × 26 grid of values, which is a
+response map of the filter over the input, indicating the response of that filter pattern at
+different locations in the input (see figure 5.3). That is what the term feature map
+means: every dimension in the depth axis is a feature (or filter), and the 2D tensor
+output[:, :, n] is the 2D spatial map of the response of this filter over the input.
+
+Convolutions are defined by two key parameters:
+- Size of the patches extracted from the inputs—These are typically 3 × 3 or 5 × 5. In the
+example, they were 3 × 3, which is a common choice.
+- Depth of the output feature map—The number of filters computed by the convolu-
+tion. The example started with a depth of 32 and ended with a depth of 64.
+
+Note that the output width and height may differ from the input width and height.
+They may differ for two reasons:
+- Border effects, which can be countered by padding the input feature map
+     In Conv2D layers, padding is configurable via the padding argument, which takes two
+     values: "valid" , which means no padding (only valid window locations will be used);
+     and "same" , which means “pad in such a way as to have an output with the same width
+     and height as the input.” The padding argument defaults to "valid" .
+- The use of strides
+    the distance between two successive windows is a parameter of the
+    convolution, called its stride, which defaults to 1.
+    To downsample feature maps, instead of strides, we tend to use the max-pooling operation
+
+Max pooling consists of extracting windows from the input feature maps and out-
+putting the max value of each channel. It’s conceptually similar to convolution, except
+that instead of transforming local patches via a learned linear transformation (the con-
+volution kernel), they’re transformed via a hardcoded max tensor operation. A big dif-
+ference from convolution is that max pooling is usually done with 2 × 2 windows and
+stride 2, in order to downsample the feature maps by a factor of 2. On the other hand,
+convolution is typically done with 3 × 3 windows and no stride (stride 1).
+
+So the most reasonable subsampling strategy is to first produce
+dense maps of features (via unstrided convolutions) and then look at the maximal
+activation of the features over small patches, rather than looking at sparser windows of
+the inputs (via strided convolutions) or averaging input patches, which could cause
+you to miss or dilute feature-presence information.
+
+deep-learning models are by nature highly repurposable: you can
+take, say, an image-classification or speech-to-text model trained on a large-scale dataset
+and reuse it on a significantly different problem with only minor changes. Specifically,
+in the case of computer vision, many pretrained models (usually trained on the Image-
+Net dataset) are now publicly available for download and can be used to bootstrap pow-
+erful vision models out of very little data.
+
+NOTE The depth of the feature maps progressively increases in the network
+(from 32 to 128), whereas the size of the feature maps decreases (from 148 ×
+148 to 7 × 7). This is a pattern you’ll see in almost all convnets.
+
+Overfitting is caused by having too few samples to learn from, rendering you unable
+to train a model that can generalize to new data. Given infinite data, your model
+would be exposed to every possible aspect of the data distribution at hand: you would
+never overfit. Data augmentation takes the approach of generating more training data
+from existing training samples, by augmenting the samples via a number of random
+transformations that yield believable-looking images.
+
+Ch 5.3 Using a pretrained convnet
+
+In this case, let’s consider a large convnet trained on the ImageNet dataset
+(1.4 million labeled images and 1,000 different classes). ImageNet contains many ani-
+mal classes, including different species of cats and dogs, and you can thus expect to
+perform well on the dogs-versus-cats classification problem.
+You’ll use the VGG16 architecture, developed by Karen Simonyan and Andrew
+Zisserman in 2014 [https://arxiv.org/abs/1409.1556]; it’s a simple and widely used convnet architecture for ImageNet. 1
+Although it’s an older model, far from the current state of the art and somewhat
+heavier than many other recent models, I chose it because its architecture is similar to
+what you’re already familiar with and is easy to understand without introducing any
+new concepts. This may be your first encounter with one of these cutesy model
+names— VGG , ResNet, Inception, Inception-ResNet, Xception, and so on; you’ll get
+used to them, because they will come up frequently if you keep doing deep learning
+for computer vision.
+There are two ways to use a pretrained network: feature extraction and fine-tuning.
+
+Feature extraction consists of using the representations learned by a previous network
+to extract interesting features from new samples. These features are then run through
+a new classifier, which is trained from scratch.
+
+Here’s the list of image-classification
+models (all pretrained on the ImageNet dataset) that are available as part of keras
+.applications :
+- Xception
+- Inception V3
+- ResNet50
+- VGG16
+- VGG19
+- MobileNet
+
+A deep neural network effectively acts as an information distillation pipeline, with raw data going in
+(in this case, RGB pictures) and being repeatedly transformed so that irrelevant infor-
+mation is filtered out (for example, the specific visual appearance of the image), and
+useful information is magnified and refined (for example, the class of the image).
+
+how convnet layers see the world: each
+layer in a convnet learns a collection of filters such that their inputs can be expressed
+as a combination of the filters. This is similar to how the Fourier transform decom-
+poses signals onto a bank of cosine functions. The filters in these convnet filter banks
+get increasingly complex and refined as you go higher in the model

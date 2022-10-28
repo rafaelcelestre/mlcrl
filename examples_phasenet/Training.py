@@ -48,7 +48,8 @@ amps = dict(zip(zern, amp_range))
 # In[12]:
 
 
-c = Config(zernike_amplitude_ranges=amps, psf_na_detection=1.1, psf_units=(0.1,0.086,0.086), psf_n=1.33, psf_lam_detection=0.515, noise_mean=None, noise_snr=None, noise_sigma=None)
+c = Config(zernike_amplitude_ranges=amps, psf_na_detection=1.1, psf_units=(0.1,0.086,0.086), psf_n=1.33,
+           psf_lam_detection=0.515, noise_mean=None, noise_snr=None, noise_sigma=None)
 vars(c)
 
 
@@ -67,7 +68,8 @@ model = PhaseNet(config=c, name='test', basedir='models')
 # In[18]:
 
 
-model.train(epochs=20)
+model.train(epochs=5)
+
 
 
 # ### Validation on synthetic data

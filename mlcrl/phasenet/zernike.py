@@ -302,7 +302,7 @@ def random_zernike_wavefront(amplitude_ranges, order='noll', rng=None):
         """
         if rng is None: rng = np.random
         amplitude_ranges = ensure_dict(amplitude_ranges, order)
-        print(">>>", amplitude_ranges, amplitude_ranges.values(), amplitude_ranges.items())
+        # print(">>>", amplitude_ranges, amplitude_ranges.values(), amplitude_ranges.items())
 
 
         all((np.isscalar(v) and v>=0) or (isinstance(v,(tuple,list)) and len(v)==2) for v in amplitude_ranges.values()) or _raise(ValueError())
