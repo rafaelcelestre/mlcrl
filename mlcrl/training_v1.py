@@ -11,7 +11,7 @@ from keras.models import load_model
 import pickle
 
 from keras.optimizers import RMSprop
-
+import json
 
 def get_model(
     architecture = "convnet", # not used!
@@ -121,20 +121,32 @@ if __name__ == "__main__":
                       metrics=['accuracy'],
                       )
 
+        # filename = 'training_v1.csv'
+        # import tensorflow as tf
+        # history_logger = tf.keras.callbacks.CSVLogger(filename, separator=" ", append=False)
+
+
         history = model.fit(training_data, training_target,
-                            epochs=500, batch_size=64, validation_split=0.2)
+                            epochs=500, batch_size=64, validation_split=0.2,
+                            # callbacks=[history_logger],
+                            )
 
         model.save('training_v1.h5')
 
-        f = open('training_v1.pkl', 'wb')
-        pickle.dump(history, f)
-        f.close()
+
+        history_dict = history.history
+
+
+        with open("training_v1.json", "w") as outfile:
+            json.dump(history_dict, outfile)
+
     else:
         model = load_model('training_v1.h5')
-        history = pickle.load('training_v1.pkl')
 
+        f = open("training_v1.json", "r")
+        f_txt = f.read()
+        history_dict = json.loads(f_txt)
 
-    history_dict = history.history
     print(history_dict.keys())
 
     import matplotlib.pyplot as plt
