@@ -177,7 +177,7 @@ def run_beamline(output_wavefront, file_with_thickness_mesh="tmp_ml0000.dat", di
         wt_offset_bfs=0,
         offset_bfs=0,
         tilt_bfs=0,
-        verbose=1)
+        verbose=0)
 
     # no drift in this element
     output_wavefront = optical_element.applyOpticalElement(input_wavefront)
@@ -245,13 +245,12 @@ def run_beamline(output_wavefront, file_with_thickness_mesh="tmp_ml0000.dat", di
 
 if __name__ == "__main__":
     import matplotlib.pylab as plt
-
-    src = run_source()
+    from srxraylib.util.h5_simple_writer import H5SimpleWriter
 
 
     distance0=3.591600
     delta = 1.0
-    npoints = 25
+    npoints = 64
 
     distance = numpy.linspace(distance0-0.5*delta, distance0+0.5*delta, npoints)
 
@@ -259,28 +258,37 @@ if __name__ == "__main__":
     do_plot = 0
 
     nsamples = 1000
-    nsamples_plot = 25
+    nsamples_plot = 5
 
-    dir = "/users/srio/Oasys/ML_TRAIN/"
+    dir = "/users/srio/Oasys/ML_TRAIN/"  # where the profile files sit
+    dir_out = "/scisoft/users/srio/ML_TRAIN2/" # where the results are going to be written
     root = "tmp_ml"
 
-    for nn in range(nsamples):
-        for i in range(npoints):
-            file_with_thickness_mesh = "%s%s%06d.dat" % (dir, root, nn)
-            output_wavefront = run_beamline(src, file_with_thickness_mesh=file_with_thickness_mesh, distance=distance[i])
+    #
+    # calculate
+    #
+    if True:
+        src = run_source()
 
-            if do_intermediate_plot: plot(output_wavefront.get_abscissas(),output_wavefront.get_intensity(),
-                 title='LAST OPTICAL ELEMENT d=%s' % (distance[i]))
+        for nn in range(nsamples):
+            if numpy.mod(nn,50) == 0: print("Calculating sample %d of %d..." % (nn+1,nsamples))
+            for i in range(npoints):
+                file_with_thickness_mesh = "%s%s%06d.dat" % (dir, root, nn)
+                output_wavefront = run_beamline(src, file_with_thickness_mesh=file_with_thickness_mesh, distance=distance[i])
 
-            if i == 0:
-                Z = numpy.zeros((npoints, output_wavefront.get_abscissas().size))
-                x = output_wavefront.get_abscissas()
-            Z[i, :] = output_wavefront.get_intensity()
+                if do_intermediate_plot: plot(output_wavefront.get_abscissas(),output_wavefront.get_intensity(),
+                     title='LAST OPTICAL ELEMENT d=%s' % (distance[i]))
 
-        if nn == 0:
-            ZZ = numpy.zeros(((nsamples, npoints, output_wavefront.get_abscissas().size)))
+                if i == 0:
+                    Z = numpy.zeros((npoints, output_wavefront.get_abscissas().size))
+                    x = output_wavefront.get_abscissas()
+                Z[i, :] = output_wavefront.get_intensity()
 
-        ZZ[nn,:,:] = Z
+            if nn == 0:
+                ZZ = numpy.zeros(((nsamples, npoints, output_wavefront.get_abscissas().size)))
+
+            ZZ[nn,:,:] = Z
+
 
 
     #
@@ -317,33 +325,77 @@ if __name__ == "__main__":
         plot_table(x * 1e6, ZZ[:,ZZ.shape[1]//2,:], legend=numpy.arange(nsamples), title="center")
         plot_table(x * 1e6, ZZ[:, -1, :], legend=numpy.arange(nsamples), title="farer")
 
-    # write h5
-    from srxraylib.util.h5_simple_writer import H5SimpleWriter
-    h5_file = "%s%s.h5" % (dir, root)
-    h5w = H5SimpleWriter.initialize_file(h5_file,creator="h5_basic_writer.py")
+    #
+    # write h5 (at every sample)
+    #
+    if True:
 
-    for i in range(nsamples):
-        # create the entry for this iteration and set default plot to "Wintensity"
-        h5w.create_entry("sample%06d"%i,nx_default="Intensity")
+        h5_file = "%s%s.h5" % (dir_out, root)
+        h5w = H5SimpleWriter.initialize_file(h5_file,creator="h5_basic_writer.py")
 
-
-        file_with_info = "%s%s%06d.txt" % (dir, root, i)
-        tmp = numpy.loadtxt(file_with_info)
-        h5w.add_key("Noll-Zcoeff-GScoeff",
-                    tmp,
-                    entry_name="sample%06d"%i)
+        for i in range(nsamples):
+            # create the entry for this iteration and set default plot to "Wintensity"
+            h5w.create_entry("sample%06d"%i,nx_default="Intensity")
 
 
-        # add the images at this entry level
-        h5w.add_image(ZZ[i,:,:],distance,1e6*x,
-                     entry_name="sample%06d"%i,image_name="Intensity",
-                     title_x="distance [m]",title_y="x [um]")
+            file_with_info = "%s%s%06d.txt" % (dir, root, i)
+            tmp = numpy.loadtxt(file_with_info)
+            h5w.add_key("Noll-Zcoeff-GScoeff",
+                        tmp,
+                        entry_name="sample%06d"%i)
 
-        # add deformation profile
-        file_with_thickness_mesh = "%s%s%06d.dat" % (dir, root, i)
-        tmp = numpy.loadtxt(file_with_thickness_mesh)
-        h5w.add_dataset(1e6*tmp[:,0],1e6*tmp[:,1],
-                    entry_name="sample%06d"%i,dataset_name="profile",
-                    title_x="X [um]",title_y="Y[um]")
 
-    print("File %s written to disk." % h5_file)
+            # add the images at this entry level
+            h5w.add_image(ZZ[i,:,:],distance,1e6*x,
+                         entry_name="sample%06d"%i,image_name="Intensity",
+                         title_x="distance [m]",title_y="x [um]")
+
+            # add deformation profile
+            file_with_thickness_mesh = "%s%s%06d.dat" % (dir, root, i)
+            tmp = numpy.loadtxt(file_with_thickness_mesh)
+            h5w.add_dataset(1e6*tmp[:,0],1e6*tmp[:,1],
+                        entry_name="sample%06d"%i,dataset_name="profile",
+                        title_x="X [um]",title_y="Y[um]")
+
+        print("File %s written to disk." % h5_file)
+
+    #
+    # write h5 (block data) includes interpolation and base removal
+    #
+    if True:
+        abscissa_new = numpy.linspace(-125e-6,125e-6,256)
+
+        ZZblock = numpy.zeros((nsamples, abscissa_new.size, npoints))
+        for i in range(nsamples):
+            for j in range(npoints):
+                y_orig = ZZ[i,j,:]
+                y_int = numpy.interp(abscissa_new, x, y_orig)
+                ZZblock[i, :, j] = y_int - y_int.min()  # TODO: remove?
+
+
+        h5_file = "%s%s_block.h5" % (dir_out, root)
+        h5w = H5SimpleWriter.initialize_file(h5_file, creator="h5_basic_writer.py")
+
+        h5w.create_entry("allsamples",nx_default="intensity")
+
+        h5w.add_stack(numpy.arange(nsamples), abscissa_new*1e6, distance, ZZblock,
+                  stack_name="intensity", entry_name="allsamples",
+                  title_0="sample", title_1="abscissa [um]", title_2="distance [m]",
+                      )
+
+        print("File %s written to disk." % h5_file)
+
+    #
+    # write file with targets
+    #
+    if True:
+        filename = "%s%s_targets_gs.txt" % (dir_out, root)
+        f = open(filename,'w')
+        for i in range(nsamples):
+            file_with_info = "%s%s%06d.txt" % (dir, root, i)
+            tmp = numpy.loadtxt(file_with_info, skiprows=3)
+            f.write("%6d   " % i)
+            for j in range(tmp.shape[0]):
+                f.write("%10.8g   " % (tmp[j,2] * 1e6)) #   in microns!!!!
+            f.write("\n")
+        print("File %s written to disk." % filename)
