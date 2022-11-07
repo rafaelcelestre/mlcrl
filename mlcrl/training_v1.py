@@ -95,7 +95,7 @@ if __name__ == "__main__":
     #
     #
     #
-    do_train = 1
+    do_train = 0
 
     if do_train:
         model = get_model()
@@ -127,7 +127,7 @@ if __name__ == "__main__":
 
 
         history = model.fit(training_data, training_target,
-                            epochs=500, batch_size=64, validation_split=0.2,
+                            epochs=1500, batch_size=64, validation_split=0.2,
                             # callbacks=[history_logger],
                             )
 
@@ -180,9 +180,20 @@ if __name__ == "__main__":
 
 
     #
+    # test evaluation
     #
     test_loss, test_acc = model.evaluate(test_data, test_target)
     #
     print(test_acc)
+
+
+    #
+    # predictions
+    #
+    # predictions = model.predict(test_data)
+    # print(predictions.shape)
+
+
+
 
 
