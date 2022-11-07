@@ -17,7 +17,7 @@ def get_model(
     architecture = "convnet", # not used!
     kernel_size = (3, 3),
     pool_size = (2, 2),
-    activation = 'tanh', # 'relu', 'softmax'
+    activation = 'relu', # 'tanh', #  'softmax'
     padding = 'same',
     input_shape = tuple((256, 64, 1)),
     output_size = 7,
@@ -95,7 +95,8 @@ if __name__ == "__main__":
     #
     #
     #
-    do_train = 0
+    do_train = 1
+    model_root = "training_v12"
 
     if do_train:
         model = get_model()
@@ -131,19 +132,19 @@ if __name__ == "__main__":
                             # callbacks=[history_logger],
                             )
 
-        model.save('training_v1.h5')
+        model.save('%s.h5' % model_root)
 
 
         history_dict = history.history
 
 
-        with open("training_v1.json", "w") as outfile:
+        with open("%s.json" % model_root, "w") as outfile:
             json.dump(history_dict, outfile)
 
     else:
-        model = load_model('training_v1.h5')
+        model = load_model('%s.h5' % model_root)
 
-        f = open("training_v1.json", "r")
+        f = open("%s.json" % model_root, "r")
         f_txt = f.read()
         history_dict = json.loads(f_txt)
 
