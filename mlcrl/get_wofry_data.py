@@ -38,9 +38,12 @@ def get_wofry_data(root, dir_out="./", training_ratio=2/3, verbose=1, gs_or_z=0,
     iend_test = size_data
 
 
-    return (data[istart_training:iend_training,:,::nbin].copy(), targets[istart_training:iend_training].copy()), \
-           (data[istart_test:iend_test,:,::nbin].copy(), targets[istart_test:iend_test].copy())
-
+    if nbin > 0: # normal binning
+        return (data[istart_training:iend_training,:,::nbin].copy(), targets[istart_training:iend_training].copy()), \
+               (data[istart_test:iend_test,:,::nbin].copy(), targets[istart_test:iend_test].copy())
+    else: # take the last part
+        return (data[istart_training:iend_training,:,(data.shape[-1]//numpy.abs(nbin)):].copy(), targets[istart_training:iend_training].copy()), \
+           (data[istart_test:iend_test,:,(data.shape[-1]//numpy.abs(nbin)):].copy(), targets[istart_test:iend_test].copy())
 
 if __name__ == "__main__":
 
