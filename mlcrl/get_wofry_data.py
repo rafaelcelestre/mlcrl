@@ -3,8 +3,12 @@
 import numpy
 import h5py
 
-def get_wofry_data(root, dir_out="./", training_ratio=2/3, verbose=1):
-    filename = "%s%s_targets_gs.txt" % (dir_out, root)
+def get_wofry_data(root, dir_out="./", training_ratio=2/3, verbose=1, gs_or_z=0):
+    if gs_or_z == 0:
+        filename = "%s%s_targets_gs.txt" % (dir_out, root)
+    else:
+        filename = "%s%s_targets_z.txt" % (dir_out, root)
+
     tmp = numpy.loadtxt(filename)
 
     targets = tmp[:,1:].copy()

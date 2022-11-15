@@ -47,7 +47,7 @@ if __name__ == "__main__":
 
     # create sampled profiles
     size = basis_x.size
-    nsamples = 1000
+    nsamples = 5000
     seed = 69  # seed for generation of the random Zernike profiles
     noll         =               [6,   8,  10,  11,  14,  22, 37]  # removed 12!!!!!!!!!!!!!!!!!!
     distrubution =             ['n', 'n', 'n', 'u', 'n', 'u', 'u']
@@ -63,7 +63,7 @@ if __name__ == "__main__":
 
     print(Y.shape,C.shape)
     xx = numpy.linspace(-1500.0e-6/2,1500.0e-6/2,size)
-    if True:
+    if False:
         plot_table(basis_x*1e6, Y.T*1e6, xtitle="Lens position [um]", ytitle="Sampled thickness [um]",
                    legend=numpy.arange(nsamples), title="sampled profiles")
 
@@ -101,7 +101,7 @@ if __name__ == "__main__":
 
 
     if True: # write files
-        dir = "/nobackup/gurb1/srio/Oasys/ML_TRAIN/"
+        dir = "/nobackup/gurb1/srio/Oasys/ML_TRAIN5000/"
         root = "tmp_ml"
 
         for i in range(nsamples):

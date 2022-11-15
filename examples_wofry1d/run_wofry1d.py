@@ -257,10 +257,10 @@ if __name__ == "__main__":
     do_intermediate_plot = 0
     do_plot = 0
 
-    nsamples = 1000
+    nsamples = 5000
     nsamples_plot = 5
 
-    dir = "/users/srio/Oasys/ML_TRAIN/"  # where the profile files sit
+    dir = "/users/srio/Oasys/ML_TRAIN5000/"  # where the profile files sit
     dir_out = "/scisoft/users/srio/ML_TRAIN2/" # where the results are going to be written
     root = "tmp_ml"
 
@@ -289,7 +289,7 @@ if __name__ == "__main__":
 
             ZZ[nn,:,:] = Z
 
-
+    print("Done (calculation).")
 
     #
     # plot
@@ -328,7 +328,7 @@ if __name__ == "__main__":
     #
     # write h5 (at every sample)
     #
-    if True:
+    if False:
 
         h5_file = "%s%s.h5" % (dir_out, root)
         h5w = H5SimpleWriter.initialize_file(h5_file,creator="h5_basic_writer.py")
@@ -388,7 +388,7 @@ if __name__ == "__main__":
     #
     # write file with targets
     #
-    if True:
+    if True: # GS coeffs
         filename = "%s%s_targets_gs.txt" % (dir_out, root)
         f = open(filename,'w')
         for i in range(nsamples):
@@ -397,5 +397,17 @@ if __name__ == "__main__":
             f.write("%6d   " % i)
             for j in range(tmp.shape[0]):
                 f.write("%10.8g   " % (tmp[j,2] * 1e6)) #   in microns!!!!
+            f.write("\n")
+        print("File %s written to disk." % filename)
+
+    if True: # Zernike coeffs
+        filename = "%s%s_targets_z.txt" % (dir_out, root)
+        f = open(filename,'w')
+        for i in range(nsamples):
+            file_with_info = "%s%s%06d.txt" % (dir, root, i)
+            tmp = numpy.loadtxt(file_with_info, skiprows=3)
+            f.write("%6d   " % i)
+            for j in range(tmp.shape[0]):
+                f.write("%10.8g   " % (tmp[j,1] * 1e6)) #   in microns!!!!
             f.write("\n")
         print("File %s written to disk." % filename)
