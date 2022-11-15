@@ -3,7 +3,7 @@
 import numpy
 import h5py
 
-def get_wofry_data(root, dir_out="./", training_ratio=2/3, verbose=1, gs_or_z=0):
+def get_wofry_data(root, dir_out="./", training_ratio=2/3, verbose=1, gs_or_z=0, nbin=1):
     if gs_or_z == 0:
         filename = "%s%s_targets_gs.txt" % (dir_out, root)
     else:
@@ -38,8 +38,8 @@ def get_wofry_data(root, dir_out="./", training_ratio=2/3, verbose=1, gs_or_z=0)
     iend_test = size_data
 
 
-    return (data[istart_training:iend_training], targets[istart_training:iend_training]), \
-           (data[istart_test:iend_test], targets[istart_test:iend_test])
+    return (data[istart_training:iend_training,:,::nbin].copy(), targets[istart_training:iend_training].copy()), \
+           (data[istart_test:iend_test,:,::nbin].copy(), targets[istart_test:iend_test].copy())
 
 
 if __name__ == "__main__":
@@ -49,7 +49,7 @@ if __name__ == "__main__":
     root = "tmp_ml"
 
 
-    (training_data, training_target), (test_data, test_target) = get_wofry_data(root, dir_out=dir_out)
+    (training_data, training_target), (test_data, test_target) = get_wofry_data(root, dir_out=dir_out, nbin=1)
 
     print("Training [data/target]: ", training_data.shape, training_target.shape)
     print("Test: [data/target]", test_data.shape, test_target.shape)
