@@ -44,10 +44,13 @@ def get_model(
 
     model.add(layers.Conv2D(128, name='conv9', kernel_size=kernel_size, activation=activation, padding=padding))
     model.add(layers.Conv2D(128, name='conv10', kernel_size=kernel_size, activation=activation, padding=padding))
-    if input_shape[0] == 1:
-        model.add(layers.MaxPooling2D(name='maxpool5', pool_size=(1, 2)))
-    else:
-        model.add(layers.MaxPooling2D(name='maxpool5', pool_size=(2, 2)))
+    try:
+        if input_shape[0] == 1:
+            model.add(layers.MaxPooling2D(name='maxpool5', pool_size=(1, 2)))
+        else:
+            model.add(layers.MaxPooling2D(name='maxpool5', pool_size=(2, 2)))
+    except:
+        model.add(layers.MaxPooling2D(name='maxpool5', pool_size=(1, 1)))
 
     model.add(layers.Flatten(name='flat'))
     model.add(layers.Dense(64, name='dense1', activation=activation))
@@ -60,11 +63,13 @@ def get_model(
 if __name__ == "__main__":
 
 
+    #dir_out = "/scisoft/users/srio/ML_TRAIN2/1000/"  # where the results are going to be written
     dir_out = "/scisoft/users/srio/ML_TRAIN2/"  # where the results are going to be written
     root = "tmp_ml"
 
 
-    (training_data, training_target), (test_data, test_target) = get_wofry_data(root, dir_out=dir_out, verbose=0)
+    nbin = 2
+    (training_data, training_target), (test_data, test_target) = get_wofry_data(root, dir_out=dir_out, verbose=0, gs_or_z=0, nbin=nbin) # !!!!!!!!!!!!!! binning  !!!!!!!!!!!
 
     print("Training: ", training_data.shape, training_target.shape)
     print("Test: ", test_data.shape, test_target.shape)
@@ -95,11 +100,11 @@ if __name__ == "__main__":
     #
     #
     #
-    do_train = 1
-    model_root = "training_v12"
+    do_train = 0
+    model_root = "training_v19"
 
     if do_train:
-        model = get_model()
+        model = get_model(input_shape = tuple((256, 64//nbin, 1)),)
 
         # To perform regression toward a vector of continuous values, end your stack of layers
         # with a Dense layer with a number of units equal to the number of values you’re trying
@@ -128,7 +133,7 @@ if __name__ == "__main__":
 
 
         history = model.fit(training_data, training_target,
-                            epochs=1500, batch_size=64, validation_split=0.2,
+                            epochs=700, batch_size=64, validation_split=0.2,
                             # callbacks=[history_logger],
                             )
 
