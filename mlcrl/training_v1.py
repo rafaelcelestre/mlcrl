@@ -68,7 +68,7 @@ if __name__ == "__main__":
     root = "tmp_ml"
 
 
-    nbin = 2
+    nbin = 1
     (training_data, training_target), (test_data, test_target) = get_wofry_data(root, dir_out=dir_out, verbose=0, gs_or_z=0, nbin=nbin) # !!!!!!!!!!!!!! binning  !!!!!!!!!!!
 
     print("Training: ", training_data.shape, training_target.shape)
@@ -101,7 +101,7 @@ if __name__ == "__main__":
     #
     #
     do_train = 0
-    model_root = "training_v19"
+    model_root = "training_v13"
 
     if do_train:
         model = get_model(input_shape = tuple((256, 64//nbin, 1)),)
@@ -147,9 +147,9 @@ if __name__ == "__main__":
             json.dump(history_dict, outfile)
 
     else:
-        model = load_model('%s.h5' % model_root)
+        model = load_model('%s/%s.h5' % (dir_out, model_root))
 
-        f = open("%s.json" % model_root, "r")
+        f = open("%s/%s.json" % (dir_out, model_root), "r")
         f_txt = f.read()
         history_dict = json.loads(f_txt)
 
