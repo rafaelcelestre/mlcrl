@@ -268,7 +268,8 @@ if __name__ == "__main__":
     nsamples = 5000
     nsamples_plot = 5
 
-    dir = "/users/srio/Oasys/ML_TRAIN5000/"  # where the profile files sit
+    # dir = "/users/srio/Oasys/ML_TRAIN5000/"  # where the profile files sit
+    dir = "/scisoft/users/srio/ML_TRAIN2/5000/"  # where the profile files sit
     dir_out = "/scisoft/users/srio/ML_TRAIN2/MULTIMODE/" # where the results are going to be written
     root = "tmp_ml"
 

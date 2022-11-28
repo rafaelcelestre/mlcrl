@@ -50,13 +50,19 @@ if __name__ == "__main__":
     # basis_used = 'gs'
     # nbin = 4
 
-    dir_out = "/scisoft/users/srio/ML_TRAIN2/"
-    model_root = "training_v19"
+    # dir_out = "/scisoft/users/srio/ML_TRAIN2/"
+    # model_root = "training_v19"
+    # dir_files = "/users/srio/Oasys/ML_TRAIN5000"
+    # n_files = 5000
+    # basis_used = 'gs'
+    # nbin = -2
+
+    dir_out = "/scisoft/users/srio/ML_TRAIN2/MULTIMODE/"
+    model_root = "training_v23"
     dir_files = "/users/srio/Oasys/ML_TRAIN5000"
     n_files = 5000
     basis_used = 'gs'
-    nbin = -2
-
+    nbin = 1
 
 
     if basis_used == 'gs':
@@ -110,10 +116,13 @@ if __name__ == "__main__":
 
         acc_values = history_dict['accuracy']
         val_acc_values = history_dict['val_accuracy']
-        if do_plot: plot(epochs, acc_values,
-             epochs, val_acc_values,
-             legend=['accuracy','val_accuracy'], xtitle='Epochs', ytitle='accuracy')
-
+        # if do_plot: plot(epochs, acc_values,
+        #      epochs, val_acc_values,
+        #      legend=['accuracy','val_accuracy'], xtitle='Epochs', ytitle='accuracy')
+        if do_plot: plot(epochs[::10], val_acc_values[::10],
+             epochs[::10], acc_values[::10],
+             legend=['accuracy on validation set', 'accuracy on training set'],
+             color=['g', 'b'], xtitle='Epochs', ytitle='accuracy', ylog=0)
 
         #
         # test evaluation
@@ -132,12 +141,13 @@ if __name__ == "__main__":
         predictions = model.predict(test_data)
         print(test_data.shape, predictions.shape)
 
-        numpy.savetxt("predictions.dat", predictions, delimiter=' ')
-        print("File predictions.dat written to disk.")
+        # numpy.savetxt("predictions.dat", predictions, delimiter=' ')
+        # print("File predictions.dat written to disk.")
 
     else:
-        predictions = numpy.loadtxt("predictions.dat")
-        print("test_data, test_target, predictions: ", test_data.shape, test_target.shape, predictions.shape)
+        pass
+        # predictions = numpy.loadtxt("predictions.dat")
+        # print("test_data, test_target, predictions: ", test_data.shape, test_target.shape, predictions.shape)
 
 
 
@@ -152,7 +162,7 @@ if __name__ == "__main__":
         width=1500e-6,
         do_plot=False)
 
-    if do_plot: plot_table(basis_x, basis_pre.T, xtitle="position [um]", ytitle="basis",
+    if False: plot_table(basis_x, basis_pre.T, xtitle="position [um]", ytitle="basis",
                title="non-orthonormal basis",
                legend=numpy.arange(basis_pre.shape[1]))
 
@@ -160,7 +170,7 @@ if __name__ == "__main__":
     basis, R = numpy.linalg.qr(basis_pre)
     print("basis, basis_x: ", basis.shape, basis_x.shape)
 
-    if do_plot: plot_table(basis_x, basis.T, xtitle="position [um]", ytitle="basis",
+    if False: plot_table(basis_x, basis.T, xtitle="position [um]", ytitle="basis",
                title="Gram-Schmidt orthonormal basis",
                legend=numpy.arange(basis.shape[1]))
 

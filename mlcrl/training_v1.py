@@ -64,7 +64,8 @@ if __name__ == "__main__":
 
 
     #dir_out = "/scisoft/users/srio/ML_TRAIN2/1000/"  # where the results are going to be written
-    dir_out = "/scisoft/users/srio/ML_TRAIN2/"  # where the results are going to be written
+    # dir_out = "/scisoft/users/srio/ML_TRAIN2/"  # where the results are going to be written
+    dir_out = "/scisoft/users/srio/ML_TRAIN2/MULTIMODE/"  # where the results are going to be written
     root = "tmp_ml"
 
 
@@ -101,7 +102,7 @@ if __name__ == "__main__":
     #
     #
     do_train = 0
-    model_root = "training_v13"
+    model_root = "training_v23"
 
     if do_train:
         model = get_model(input_shape = tuple((256, 64//nbin, 1)),)
@@ -133,7 +134,7 @@ if __name__ == "__main__":
 
 
         history = model.fit(training_data, training_target,
-                            epochs=700, batch_size=64, validation_split=0.2,
+                            epochs=1500, batch_size=64, validation_split=0.2,
                             # callbacks=[history_logger],
                             )
 
@@ -171,9 +172,10 @@ if __name__ == "__main__":
 
     acc_values = history_dict['accuracy']
     val_acc_values = history_dict['val_accuracy']
-    plot(epochs, acc_values,
-         epochs, val_acc_values,
-         legend=['accuracy','val_accuracy'], xtitle='Epochs', ytitle='accuracy')
+    plot(epochs, val_acc_values,
+         epochs, acc_values,
+         legend=['accuracy on validation set','accuracy on training set'],
+         color=['g','b'], xtitle='Epochs', ytitle='accuracy')
 
 
     # plt.plot(epochs, loss_values, 'bo', label='Training loss')
