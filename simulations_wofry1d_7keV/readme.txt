@@ -22,6 +22,9 @@ Mechanism of a simulation flowchart:
    v15 32 planes
    v16 16 planes
    v19 32 planes downstream from focus
+   v19 32 planes downstream from focus
+   v20 multimode standard
+   v23 multimode 25000 epochs
 
 
 
