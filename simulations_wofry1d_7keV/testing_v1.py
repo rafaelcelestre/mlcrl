@@ -19,6 +19,7 @@ if __name__ == "__main__":
     # n_files = 1000
     # basis_used = 'gs'
     # nbin = 1
+    # pstart = 100
 
 
     # dir_out = "/scisoft/users/srio/ML_TRAIN2/"
@@ -27,6 +28,8 @@ if __name__ == "__main__":
     # n_files = 5000
     # basis_used = 'gs'
     # nbin = 1
+    # pstart = 100
+
 
     # dir_out = "/scisoft/users/srio/ML_TRAIN2/"
     # model_root = "training_v14"
@@ -34,6 +37,7 @@ if __name__ == "__main__":
     # n_files = 5000
     # basis_used = 'z'
     # nbin = 1
+    # pstart = 100
 
 
     # dir_out = "/scisoft/users/srio/ML_TRAIN2/"
@@ -42,6 +46,7 @@ if __name__ == "__main__":
     # n_files = 5000
     # basis_used = 'gs'
     # nbin = 2
+    # pstart = 100
 
     # dir_out = "/scisoft/users/srio/ML_TRAIN2/"
     # model_root = "training_v16"
@@ -49,6 +54,7 @@ if __name__ == "__main__":
     # n_files = 5000
     # basis_used = 'gs'
     # nbin = 4
+    # pstart = 100
 
     # dir_out = "/scisoft/users/srio/ML_TRAIN2/"
     # model_root = "training_v19"
@@ -56,6 +62,15 @@ if __name__ == "__main__":
     # n_files = 5000
     # basis_used = 'gs'
     # nbin = -2
+    # pstart = 100
+
+    # dir_out = "/scisoft/users/srio/ML_TRAIN2/MULTIMODE/"
+    # model_root = "training_v20"
+    # dir_files = "/users/srio/Oasys/ML_TRAIN5000"
+    # n_files = 5000
+    # basis_used = 'gs'
+    # nbin = 1
+    # pstart = 100
 
     dir_out = "/scisoft/users/srio/ML_TRAIN2/MULTIMODE/"
     model_root = "training_v23"
@@ -63,7 +78,7 @@ if __name__ == "__main__":
     n_files = 5000
     basis_used = 'gs'
     nbin = 1
-
+    pstart = 100
 
     if basis_used == 'gs':
         (training_data, training_target), (test_data, test_target) = get_wofry_data(root, dir_out=dir_out, verbose=0, gs_or_z=0, nbin=nbin)
@@ -175,7 +190,7 @@ if __name__ == "__main__":
                legend=numpy.arange(basis.shape[1]))
 
 
-    for i in range(100,predictions.shape[0]):
+    for i in range(pstart,predictions.shape[0]):
         print("\n>>>> testing sample: ", i)
         profile_orig = numpy.zeros(size)
         profile_fit = numpy.zeros(size)
@@ -197,13 +212,14 @@ if __name__ == "__main__":
         else:
             raise Exception("error...")
 
-        plot(basis_x, profile_orig,
-             basis_x, profile_fit,
-             a[::10,0], a[::10,1]*1e6,
+        plot(basis_x*1e3, profile_orig,
+             basis_x*1e3, profile_fit,
+             # a[::10,0], a[::10,1]*1e6,
              legend=["original", "prediction (%s)" % basis_used, ff],
              linestyle=[None,None,''],
              marker=[None,None,'.'],
-             title="testing sample %d (sample # %d)" % (i, i_file))
+             title="testing sample %d (sample # %d)" % (i, i_file),
+             xtitle="abscissas [mm]", ytitle="Profile height [$\mu$m]", )
 
         # plot(a[:,0]*1e6, a[:,1]*1e6)
 
