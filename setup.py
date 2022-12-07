@@ -32,7 +32,7 @@ __date__ = "06/04/2021"
 from setuptools import setup
 
 setup(name='mlcrl',
-    version='0.0.1',
+    version='0.0.2',
     description='CRLs and more',
     author='R. Celestre, J. Reyes Herrera, M. Sanchez del Rio',
     author_email='rafael.celestre@esrf.fr',
