@@ -16,7 +16,7 @@ if __name__ == "__main__":
     #
     if True:
         size = 512
-        nsamples = 4
+        nsamples = 5000
         seed = 69  # seed for generation of the random Zernike profiles
         # noll         =             [6,     8,  10,  11,  12,  14,  22,  37]
         # distrubution =             ['n', 'n', 'n', 'u', 'n', 'n', 'u', 'u']
@@ -41,7 +41,7 @@ if __name__ == "__main__":
         y = numpy.linspace(-width / 2, width / 2, size)
 
         if True:
-            for i in range(Z.shape[2]):
+            for i in range(4): # range(Z.shape[2]):
                 plot_image(Z[:,:,i], x*1e6, y*1e6, title="sampled # %s" % (i + 1), xtitle="X [um]", ytitle="Y [um]")
 
 
