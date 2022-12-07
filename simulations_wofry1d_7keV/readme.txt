@@ -1,7 +1,7 @@
 Mechanism of a simulation flowchart:
 
 1) create the deformation files and the targets (polynomial coeffs - we use orthonormal polynomials)
-   script: create_1d_gramschmidt_sampled_profiles.py
+   script: run_create_1d_gramschmidt_sampled_profiles.py
    files: ~/Oasys/ML_TRAIN5000/tmp_ml000011.[dat,txt]
 
 2) run wofry for the optical system for every deformation file previosly created, and write obtained
@@ -26,6 +26,7 @@ Mechanism of a simulation flowchart:
    v20 multimode standard
    v23 multimode 25000 epochs
 
-
+4) test CNN (loads the CNN from h5 file and runs the test cases)
+   script: testing_v1.py
 
 
