@@ -50,7 +50,7 @@ def create_2d_zernike_sampled_profiles(nsamples,
 # Generator(PCG64) 1 6.585212425935185e-06 7
 # Generator(PCG64) 1 -1.0695773383463991e-07 7
 # Generator(PCG64) 1 4.621093285144029e-06 7
-            print(rg,i,c, len(noll))
+#             print(rg,i,c, len(noll))
             w = z.polynomial(size, outside=0.0)
             zz += c * w
             C[ij, i] = c
