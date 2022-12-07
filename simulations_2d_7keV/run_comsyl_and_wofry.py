@@ -212,6 +212,65 @@ def run_beamline(output_wavefront, file_with_thickness_mesh="", distance=3.59000
 
     return output_wavefront
 
+def resize_array(a, new_rows, new_cols):
+    '''
+    This function takes an 2D numpy array a and produces a smaller array
+    of size new_rows, new_cols. new_rows and new_cols must be less than
+    or equal to the number of rows and columns in a.
+    '''
+    rows = len(a)
+    cols = len(a[0])
+    yscale = float(rows) / new_rows
+    xscale = float(cols) / new_cols
+
+    # first average across the cols to shorten rows
+    new_a = numpy.zeros((rows, new_cols))
+    for j in range(new_cols):
+        # get the indices of the original array we are going to average across
+        the_x_range = (j*xscale, (j+1)*xscale)
+        firstx = int(the_x_range[0])
+        lastx = int(the_x_range[1])
+        # figure out the portion of the first and last index that overlap
+        # with the new index, and thus the portion of those cells that
+        # we need to include in our average
+        x0_scale = 1 - (the_x_range[0]-int(the_x_range[0]))
+        xEnd_scale =  (the_x_range[1]-int(the_x_range[1]))
+        # scale_line is a 1d array that corresponds to the portion of each old
+        # index in the_x_range that should be included in the new average
+        scale_line = numpy.ones((lastx-firstx+1))
+        scale_line[0] = x0_scale
+        scale_line[-1] = xEnd_scale
+        # Make sure you don't screw up and include an index that is too large
+        # for the array. This isn't great, as there could be some floating
+        # point errors that mess up this comparison.
+        if scale_line[-1] == 0:
+            scale_line = scale_line[:-1]
+            lastx = lastx - 1
+        # Now it's linear algebra time. Take the dot product of a slice of
+        # the original array and the scale_line
+        new_a[:,j] = numpy.dot(a[:,firstx:lastx+1], scale_line)/scale_line.sum()
+
+    # Then average across the rows to shorten the cols. Same method as above.
+    # It is probably possible to simplify this code, as this is more or less
+    # the same procedure as the block of code above, but transposed.
+    # Here I'm reusing the variable a. Sorry if that's confusing.
+    a = numpy.zeros((new_rows, new_cols))
+    for i in range(new_rows):
+        the_y_range = (i*yscale, (i+1)*yscale)
+        firsty = int(the_y_range[0])
+        lasty = int(the_y_range[1])
+        y0_scale = 1 - (the_y_range[0]-int(the_y_range[0]))
+        yEnd_scale =  (the_y_range[1]-int(the_y_range[1]))
+        scale_line = numpy.ones((lasty-firsty+1))
+        scale_line[0] = y0_scale
+        scale_line[-1] = yEnd_scale
+        if scale_line[-1] == 0:
+            scale_line = scale_line[:-1]
+            lasty = lasty - 1
+        a[i:,] = numpy.dot(scale_line, new_a[firsty:lasty+1,])/scale_line.sum()
+
+    return a
+
 if __name__ == "__main__":
 
     if False:
@@ -229,6 +288,7 @@ if __name__ == "__main__":
     distance0=3.591600
     delta = 1.0
     npoints = 5 # 64
+    rebin_size=256
 
     distance = numpy.linspace(distance0-0.5*delta, distance0+0.5*delta, npoints)
 
@@ -241,7 +301,7 @@ if __name__ == "__main__":
     dir_out = "/scisoft/users/srio/ML_TRAIN2/RESULTS_2D/" # where the results are going to be written
     root = "tmp_ml"
 
-
+    ZZ = numpy.zeros((nsamples, npoints, rebin_size, rebin_size))
     #
     # calculate
     #
@@ -263,14 +323,14 @@ if __name__ == "__main__":
 
                 if i == 0:
                     s = output_wavefront_intensity.shape
-                    Z = numpy.zeros((npoints, s[0], s[1]))
+                    Z = numpy.zeros((npoints, rebin_size, rebin_size)) # s[0], s[1]))
                     x = output_wavefront.get_coordinate_x()
                     y = output_wavefront.get_coordinate_y()
-                Z[i, :, :] = output_wavefront_intensity
+                Z[i, :, :] = resize_array(output_wavefront_intensity, rebin_size, rebin_size)
 
-            if nn == 0:
-                s = output_wavefront_intensity.shape
-                ZZ = numpy.zeros(((nsamples, npoints, s[0], s[1])))
+            # if nn == 0:
+                # s = output_wavefront_intensity.shape
+                # ZZ = numpy.zeros(((nsamples, npoints, s[0], s[1])))
 
             ZZ[nn,:,:,:] = Z
 
@@ -311,7 +371,12 @@ if __name__ == "__main__":
 
         h5w.create_entry("allsamples",nx_default="intensity")
 
-        h5w.add_deepstack([numpy.arange(nsamples), distance, x*1e6, y*1e6], ZZ,
+        # h5w.add_deepstack([numpy.arange(nsamples), distance, x * 1e6, y * 1e6], ZZ,
+        h5w.add_deepstack([numpy.arange(nsamples),
+                           distance,
+                           numpy.linspace(x[0]*1e6, x[-1]*1e6, rebin_size),
+                           numpy.linspace(y[0]*1e6, y[-1]*1e6, rebin_size)],
+                           ZZ,
                           stack_name="intensity", entry_name="allsamples",
                           # list_of_axes_labels=["sample", "distance", "X", "Y"],
                           list_of_axes_titles=["sample", "distance [m]", "X [um]", "Y [um]"])
