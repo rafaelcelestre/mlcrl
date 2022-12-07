@@ -116,6 +116,10 @@ if __name__ == "__main__":
 
         model = load_model('%s/%s.h5' % (dir_out, model_root))
 
+        # learning with v13 and loading training v23: Does not work
+        #model = load_model('%s/%s.h5' % (dir_out, "../training_v13"))
+
+
         f = open("%s/%s.json" % (dir_out, model_root), "r")
         f_txt = f.read()
         history_dict = json.loads(f_txt)

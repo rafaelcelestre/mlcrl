@@ -37,12 +37,27 @@ def create_2d_zernike_sampled_profiles(nsamples,
             else:
                 raise Exception("Why am I here?")
 
+#Generator(PCG64) 0 1.785774589511436e-06 7
+# Generator(PCG64) 0 8.465043621172215e-07 7
+# Generator(PCG64) 0 6.654259141073615e-06 7
+# Generator(PCG64) 0 5.3994894946457855e-06 7
+# Generator(PCG64) 0 -3.987190882967194e-07 7
+# Generator(PCG64) 0 3.166962286232809e-06 7
+# Generator(PCG64) 0 2.231738805778543e-07 7
+# Generator(PCG64) 1 -1.3682866656138383e-06 7
+# Generator(PCG64) 1 -2.0353079624572042e-07 7
+# Generator(PCG64) 1 -8.597814005268755e-07 7
+# Generator(PCG64) 1 6.585212425935185e-06 7
+# Generator(PCG64) 1 -1.0695773383463991e-07 7
+# Generator(PCG64) 1 4.621093285144029e-06 7
+            print(rg,i,c, len(noll))
             w = z.polynomial(size, outside=0.0)
             zz += c * w
             C[ij, i] = c
         Z[:, :, i] = zz
 
         if do_plot: plot_image(zz, x, y, title="sampled # %s" % (i + 1))
+
 
     return C, Z
 
