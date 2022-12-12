@@ -142,7 +142,7 @@ def run_beamline(output_wavefront, file_with_thickness_mesh="", distance=3.59000
         aperture_shape=0,
         aperture_dimension_h=0.0015,
         aperture_dimension_v=0.0015,
-        verbose=1)
+        verbose=0)
 
     # no drift in this element
     output_wavefront = optical_element.applyOpticalElement(input_wavefront)
@@ -161,7 +161,7 @@ def run_beamline(output_wavefront, file_with_thickness_mesh="", distance=3.59000
     input_wavefront = output_wavefront.duplicate()
     from wofryimpl.beamline.optical_elements.refractors.thin_object import WOThinObject
 
-    optical_element = WOThinObject(name='ThinObject',file_with_thickness_mesh=file_with_thickness_mesh,material='Be')
+    optical_element = WOThinObject(name='ThinObject',file_with_thickness_mesh=file_with_thickness_mesh,material='Be',verbose=0)
 
     # no drift in this element
     output_wavefront = optical_element.applyOpticalElement(input_wavefront)
@@ -287,7 +287,7 @@ if __name__ == "__main__":
 
     distance0=3.591600
     delta = 1.0
-    npoints = 5 # 64
+    npoints = 64 # 5 # 64
     rebin_size=256
 
     distance = numpy.linspace(distance0-0.5*delta, distance0+0.5*delta, npoints)
@@ -295,13 +295,13 @@ if __name__ == "__main__":
     do_intermediate_plot = 0
     do_plot = 0
 
-    nsamples = 3 # 5000
+    nsamples = 5000 # 3 # 5000
 
     dir = "/scisoft/users/srio/ML_TRAIN2/5000_2Dv1/"  # where the profile files sit
     dir_out = "/scisoft/users/srio/ML_TRAIN2/RESULTS_2D/" # where the results are going to be written
     root = "tmp_ml"
 
-    ZZ = numpy.zeros((nsamples, npoints, rebin_size, rebin_size))
+    # ZZ = numpy.zeros((nsamples, npoints, rebin_size, rebin_size))
     #
     # calculate
     #
@@ -328,57 +328,50 @@ if __name__ == "__main__":
                     y = output_wavefront.get_coordinate_y()
                 Z[i, :, :] = resize_array(output_wavefront_intensity, rebin_size, rebin_size)
 
-            # if nn == 0:
-                # s = output_wavefront_intensity.shape
-                # ZZ = numpy.zeros(((nsamples, npoints, s[0], s[1])))
+            #
+            # write h5 (block data) includes interpolation and base removal
+            #
+            if True:
+                # abscissa_new = numpy.linspace(-125e-6,125e-6,256)
+                #
+                # ZZblock = numpy.zeros((nsamples, abscissa_new.size, npoints))
+                # for i in range(nsamples):
+                #     for j in range(npoints):
+                #         y_orig = ZZ[i,j,:]
+                #         y_int = numpy.interp(abscissa_new, x, y_orig)
+                #         ZZblock[i, :, j] = y_int - y_int.min()  # TODO: remove?
 
-            ZZ[nn,:,:,:] = Z
 
-    print("Done (calculation).")
+                h5_file = "%s%s_%06d.h5" % (dir_out, root, nn)
+                h5w = H5SimpleWriter.initialize_file(h5_file, creator="h5_basic_writer.py")
+
+                h5w.create_entry("singlesample",nx_default="intensity")
+
+                # h5w.add_deepstack([numpy.arange(nsamples), distance, x * 1e6, y * 1e6], ZZ,
+                h5w.add_deepstack([distance,
+                                   numpy.linspace(x[0]*1e6, x[-1]*1e6, rebin_size),
+                                   numpy.linspace(y[0]*1e6, y[-1]*1e6, rebin_size)],
+                                   Z,
+                                  stack_name="intensity", entry_name="singlesample",
+                                  # list_of_axes_labels=["distance", "X", "Y"],
+                                  list_of_axes_titles=["distance [m]", "X [um]", "Y [um]"])
+
+                print("File %s written to disk." % h5_file)
+
+        print("Done (calculation).")
 
     #
     # write file with targets
     #
 
-    if True: # Zernike coeffs
+    if True:  # Zernike coeffs
         filename = "%s%s_targets_z.txt" % (dir_out, root)
-        f = open(filename,'w')
+        f = open(filename, 'w')
         for i in range(nsamples):
             file_with_info = "%s%s%06d.txt" % (dir, root, i)
             tmp = numpy.loadtxt(file_with_info, skiprows=2)
             f.write("%6d   " % i)
             for j in range(tmp.shape[0]):
-                f.write("%10.8g   " % (tmp[j,1] * 1e6)) #   in microns!!!!
+                f.write("%10.8g   " % (tmp[j, 1] * 1e6))  # in microns!!!!
             f.write("\n")
         print("File %s written to disk." % filename)
-
-    #
-    # write h5 (block data) includes interpolation and base removal
-    #
-    if True:
-        # abscissa_new = numpy.linspace(-125e-6,125e-6,256)
-        #
-        # ZZblock = numpy.zeros((nsamples, abscissa_new.size, npoints))
-        # for i in range(nsamples):
-        #     for j in range(npoints):
-        #         y_orig = ZZ[i,j,:]
-        #         y_int = numpy.interp(abscissa_new, x, y_orig)
-        #         ZZblock[i, :, j] = y_int - y_int.min()  # TODO: remove?
-
-
-        h5_file = "%s%s_block.h5" % (dir_out, root)
-        h5w = H5SimpleWriter.initialize_file(h5_file, creator="h5_basic_writer.py")
-
-        h5w.create_entry("allsamples",nx_default="intensity")
-
-        # h5w.add_deepstack([numpy.arange(nsamples), distance, x * 1e6, y * 1e6], ZZ,
-        h5w.add_deepstack([numpy.arange(nsamples),
-                           distance,
-                           numpy.linspace(x[0]*1e6, x[-1]*1e6, rebin_size),
-                           numpy.linspace(y[0]*1e6, y[-1]*1e6, rebin_size)],
-                           ZZ,
-                          stack_name="intensity", entry_name="allsamples",
-                          # list_of_axes_labels=["sample", "distance", "X", "Y"],
-                          list_of_axes_titles=["sample", "distance [m]", "X [um]", "Y [um]"])
-
-        print("File %s written to disk." % h5_file)
