@@ -318,7 +318,7 @@ if __name__ == "__main__":
             missing_samples.append(nn)
 
     print("Missing files indices: ", missing_samples)
-    if True:
+    if False:
         src = run_source()
 
         # for nn in range(start_nsamples, start_nsamples+nsamples):
