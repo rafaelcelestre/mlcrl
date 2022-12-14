@@ -130,15 +130,24 @@ if __name__ == "__main__":
     # numpy.save('targets.npy', targets)
     # numpy.save('filenames.npy', filenames)
 
-    from sklearn.model_selection import train_test_split
+
 
     print("filenames.shape" , filenames.shape)
     print("targets.shape" , targets.shape)
 
-    filenames_train, filenames_val, targets_train, targets_val = train_test_split(
-        filenames, targets, test_size=0.2, shuffle=False, random_state=None)
-
     if False:
+        from sklearn.model_selection import train_test_split
+        filenames_train, filenames_val, targets_train, targets_val = train_test_split(
+            filenames, targets, test_size=0.2, shuffle=False, random_state=None)
+    else:
+        filenames_train = filenames[0:4000,:].copy()
+        filenames_val = filenames[4000:,:].copy()
+        targets_train = targets[0:4000,:].copy()
+        targets_val = targets[4000:,:].copy()
+
+
+
+    if True:
         print("\n** filenames_train.shape" , filenames_train.shape, filenames_train[0:2])
         print("\n** filenames_val.shape" , filenames_val.shape, filenames_val[0:2])
         print("\n** targets_train.shape" , targets_train.shape, targets_train[0:2])
