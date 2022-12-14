@@ -153,7 +153,7 @@ if __name__ == "__main__":
         print("\n** targets_train.shape" , targets_train.shape, targets_train[0:2])
         print("\n** targets_val.shape" , targets_val.shape, targets_val[0:2])
 
-    batch_size = 32
+    batch_size = 4
     my_training_batch_generator = My_Custom_Generator(filenames_train, targets_train, batch_size)
     my_validation_batch_generator = My_Custom_Generator(filenames_val, targets_val, batch_size)
 
