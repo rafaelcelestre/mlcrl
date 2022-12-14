@@ -18,6 +18,8 @@ from wofryimpl.propagator.propagators2D.integral import Integral2D
 from wofryimpl.propagator.propagators2D.fresnel_zoom_xy import FresnelZoomXY2D
 
 from srxraylib.plot.gol import plot, plot_image
+
+import os
 plot_from_oe = 500 # set to a large number to avoid plots
 
 def run_source(mode_index = 0):
@@ -296,6 +298,8 @@ if __name__ == "__main__":
     do_plot = 0
 
     nsamples = 5000 # 3 # 5000
+    start_nsamples = 0
+
 
     dir = "/scisoft/users/srio/ML_TRAIN2/5000_2Dv1/"  # where the profile files sit
     dir_out = "/scisoft/users/srio/ML_TRAIN2/RESULTS_2D/" # where the results are going to be written
@@ -305,10 +309,20 @@ if __name__ == "__main__":
     #
     # calculate
     #
+    missing_samples = []
+    for nn in range(start_nsamples, start_nsamples+nsamples):
+        h5_file = "%s%s_%06d.h5" % (dir_out, root, nn)
+        if os.path.isfile(h5_file):
+            pass
+        else:
+            missing_samples.append(nn)
+
+    print("Missing files indices: ", missing_samples)
     if True:
         src = run_source()
 
-        for nn in range(nsamples):
+        # for nn in range(start_nsamples, start_nsamples+nsamples):
+        for nn in range(missing_samples):
             if numpy.mod(nn,50) == 0: print("Calculating sample %d of %d..." % (nn+1,nsamples))
             for i in range(npoints):
                 file_with_thickness_mesh = "%s%s%06d.h5" % (dir, root, nn)
