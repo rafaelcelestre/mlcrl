@@ -322,7 +322,7 @@ if __name__ == "__main__":
         src = run_source()
 
         # for nn in range(start_nsamples, start_nsamples+nsamples):
-        for nn in range(missing_samples):
+        for nn in missing_samples:
             if numpy.mod(nn,50) == 0: print("Calculating sample %d of %d..." % (nn+1,nsamples))
             for i in range(npoints):
                 file_with_thickness_mesh = "%s%s%06d.h5" % (dir, root, nn)
