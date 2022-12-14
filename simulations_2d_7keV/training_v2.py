@@ -42,7 +42,7 @@ class My_Custom_Generator(keras.utils.Sequence):
             f = h5py.File(filename[0],'r')
             Z = f['singlesample/intensity/stack_data'][()]
             f.close()
-            stack[i] = Z
+            stack[i] = Z * 1e-20
 
         # min_training_data = training_data.min()
         # max_training_data = training_data.max()
