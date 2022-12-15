@@ -190,7 +190,7 @@ if __name__ == "__main__":
     model_root = "training_v30"
 
     if do_train:
-        model = get_model(input_shape = tuple((64, 256, 256, 1)),)
+        model = get_model(input_shape = tuple((64, 256, 256)),)
 
         model.compile(
                       # optimizer='rmsprop',
