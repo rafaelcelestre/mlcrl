@@ -94,17 +94,40 @@ def get_model(
 
     model.add(layers.Conv3D(128, name='conv9', kernel_size=kernel_size, activation=activation, padding=padding))
     model.add(layers.Conv3D(128, name='conv10', kernel_size=kernel_size, activation=activation, padding=padding))
+
+
+    # try:
+    #     if input_shape[0] == 1:
+    #         model.add(layers.MaxPooling3D(name='maxpool5', pool_size=(1, 2, 2)))
+    #     else:
+    #         model.add(layers.MaxPooling3D(name='maxpool5', pool_size=(2, 2, 2)))
+    # except:
+    #     model.add(layers.MaxPooling3D(name='maxpool5', pool_size=(1, 1, 1)))
+    model.add(layers.MaxPooling3D(name='maxpool5', pool_size=pool_size))
+
+    model.add(layers.Conv3D(256, name='conv11', kernel_size=kernel_size, activation=activation, padding=padding))
+    model.add(layers.Conv3D(256, name='conv12', kernel_size=kernel_size, activation=activation, padding=padding))
+    model.add(layers.MaxPooling3D(name='maxpool6', pool_size=pool_size))
+
+    model.add(layers.Conv3D(512, name='conv13', kernel_size=kernel_size, activation=activation, padding=padding))
+    model.add(layers.Conv3D(512, name='conv14', kernel_size=kernel_size, activation=activation, padding=padding))
+    model.add(layers.MaxPooling3D(name='maxpool7', pool_size=pool_size))
+
+
+    model.add(layers.Conv3D(1024, name='conv15', kernel_size=kernel_size, activation=activation, padding=padding))
+    model.add(layers.Conv3D(1024, name='conv16', kernel_size=kernel_size, activation=activation, padding=padding))
+
     try:
         if input_shape[0] == 1:
-            model.add(layers.MaxPooling3D(name='maxpool5', pool_size=(1, 2, 2)))
+            model.add(layers.MaxPooling3D(name='maxpool8', pool_size=(1, 2, 2)))
         else:
-            model.add(layers.MaxPooling3D(name='maxpool5', pool_size=(2, 2, 2)))
+            model.add(layers.MaxPooling3D(name='maxpool8', pool_size=(2, 2, 2)))
     except:
-        model.add(layers.MaxPooling3D(name='maxpool5', pool_size=(1, 1, 1)))
+        model.add(layers.MaxPooling3D(name='maxpool8', pool_size=(1, 1, 1)))
 
     model.add(layers.Flatten(name='flat'))
-    model.add(layers.Dense(64//4, name='dense1', activation=activation))
-    model.add(layers.Dense(64//4, name='dense2', activation=activation))
+    model.add(layers.Dense(64, name='dense1', activation=activation))
+    model.add(layers.Dense(64, name='dense2', activation=activation))
     model.add(layers.Dense(output_size, name='Y', activation='linear'))
 
     print(model.summary())
