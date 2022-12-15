@@ -36,13 +36,13 @@ class My_Custom_Generator(keras.utils.Sequence):
 
 
 
-        stack =  numpy.zeros((self.batch_size, 64, 256, 256))
+        stack =  numpy.zeros((self.batch_size, 64, 256, 256, 1))
         for i,filename in enumerate(batch_x):
             # print(">>>>> reading file", i, filename[0])
             f = h5py.File(filename[0],'r')
             Z = f['singlesample/intensity/stack_data'][()]
             f.close()
-            stack[i] = Z * 1e-20
+            stack[i, :, :, :, 0] = Z * 1e-20
 
         # min_training_data = training_data.min()
         # max_training_data = training_data.max()
@@ -68,7 +68,7 @@ def get_model(
     pool_size = (1, 2, 2),
     activation = 'relu', # 'tanh', #  'softmax'
     padding = 'same',
-    input_shape = tuple((64, 256, 256)),
+    input_shape = tuple((64, 256, 256, 1)), # tuple((64, 256, 256)
     output_size = 7,
     ):
 
@@ -175,7 +175,7 @@ if __name__ == "__main__":
         print("\n** targets_train.shape" , targets_train.shape, targets_train[0:2])
         print("\n** targets_val.shape" , targets_val.shape, targets_val[0:2])
 
-    batch_size = 4
+    batch_size = 1
     my_training_batch_generator = My_Custom_Generator(filenames_train, targets_train, batch_size)
     my_validation_batch_generator = My_Custom_Generator(filenames_val, targets_val, batch_size)
 
@@ -190,7 +190,7 @@ if __name__ == "__main__":
     model_root = "training_v30"
 
     if do_train:
-        model = get_model(input_shape = tuple((64, 256, 256)),)
+        model = get_model()
 
         model.compile(
                       # optimizer='rmsprop',
