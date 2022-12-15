@@ -58,7 +58,6 @@ class My_Custom_Generator(keras.utils.Sequence):
         # training_data = training_data.astype('float32')
         # training_data = (training_data - min_training_data) / (max_training_data - min_training_data)
 
-
         return stack, batch_y
 
 
@@ -69,7 +68,7 @@ def get_model(
     pool_size = (1, 2, 2),
     activation = 'relu', # 'tanh', #  'softmax'
     padding = 'same',
-    input_shape = tuple((64, 256, 256, 1)),
+    input_shape = tuple((64, 256, 256)),
     output_size = 7,
     ):
 
