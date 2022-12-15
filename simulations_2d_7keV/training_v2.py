@@ -156,16 +156,19 @@ if __name__ == "__main__":
 
     print("filenames.shape" , filenames.shape)
     print("targets.shape" , targets.shape)
+    nsamples = 5000
+    ntrainingvalidation = int(nsamples * 2 / 3)
+    ntraining = int(ntrainingvalidation * 0.8)
 
     if False:
         from sklearn.model_selection import train_test_split
         filenames_train, filenames_val, targets_train, targets_val = train_test_split(
             filenames, targets, test_size=0.2, shuffle=False, random_state=None)
     else:
-        filenames_train = filenames[0:4000,:].copy()
-        filenames_val = filenames[4000:,:].copy()
-        targets_train = targets[0:4000,:].copy()
-        targets_val = targets[4000:,:].copy()
+        filenames_train = filenames[:ntraining,:].copy()
+        filenames_val = filenames[ntraining:ntrainingvalidation,:].copy()
+        targets_train = targets[:ntraining,:].copy()
+        targets_val = targets[ntraining:ntrainingvalidation,:].copy()
 
 
 
@@ -213,11 +216,11 @@ if __name__ == "__main__":
     #
 
         history = model.fit_generator(generator=my_training_batch_generator,
-                            steps_per_epoch=int(0.8 * 5000 // batch_size),
+                            steps_per_epoch=int(0.8 * ntrainingvalidation // batch_size),
                             epochs=10,
                             verbose=1,
                             validation_data=my_validation_batch_generator,
-                            validation_steps=int(0.2 * 5000 // batch_size),
+                            validation_steps=int(0.2 * ntrainingvalidation // batch_size),
                             # callbacks=[history_logger],
                                       )
 
