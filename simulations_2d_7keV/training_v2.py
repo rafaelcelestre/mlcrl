@@ -190,7 +190,7 @@ if __name__ == "__main__":
     #
     #
     do_train = 1
-    model_root = "training_v30"
+    model_root = "training_v31"
 
     if do_train:
         model = get_model()
@@ -215,26 +215,25 @@ if __name__ == "__main__":
     #                         )
     #
 
-        # os.makedirs(f'{run_dir}/models', mode=0o750, exist_ok=True)
-        # save_dir = f'{run_dir}/models/best_model.h5'
-        # savemodel_callback = tf.keras.callbacks.ModelCheckpoint(filepath=save_dir, verbose=0, save_best_only=True)
+        savemodel_callback = tf.keras.callbacks.ModelCheckpoint(filepath="%s/%s_best.h5"%(dir_out, model_root),
+                                                                verbose=0, save_best_only=True)
 
 
         history = model.fit_generator(generator=my_training_batch_generator,
                             steps_per_epoch=int(0.8 * ntrainingvalidation // batch_size),
-                            epochs=10,
+                            epochs=100,
                             verbose=1,
                             validation_data=my_validation_batch_generator,
                             validation_steps=int(0.2 * ntrainingvalidation // batch_size),
-                            # callbacks=[savemodel_callback],
+                            callbacks=[savemodel_callback],
                                       )
 
 
 
-        model.save('%s.h5' % model_root)
+        model.save('%s/%s.h5' %(dir_out, model_root))
     #
     #
-        history_dict = history.history
+        # history_dict = history.history
     #
     #
     #     with open("%s.json" % model_root, "w") as outfile:
@@ -247,15 +246,15 @@ if __name__ == "__main__":
     #     f_txt = f.read()
     #     history_dict = json.loads(f_txt)
     #
-    print(history_dict.keys())
-    #
-    import matplotlib.pyplot as plt
-    loss_values = history_dict['loss']
-    val_loss_values = history_dict['val_loss']
-    epochs = range(1, len(loss_values) + 1)
-    plot(epochs, loss_values,
-         epochs, val_loss_values,
-         legend=['loss','val_loss'], xtitle='Epochs', ytitle='Loss', show=0)
+    # print(history_dict.keys())
+    # #
+    # import matplotlib.pyplot as plt
+    # loss_values = history_dict['loss']
+    # val_loss_values = history_dict['val_loss']
+    # epochs = range(1, len(loss_values) + 1)
+    # plot(epochs, loss_values,
+    #      epochs, val_loss_values,
+    #      legend=['loss','val_loss'], xtitle='Epochs', ytitle='Loss', show=0)
     #
     # # mae_values = history_dict['mae']
     # # val_mae_values = history_dict['val_mae']
