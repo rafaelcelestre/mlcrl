@@ -215,13 +215,18 @@ if __name__ == "__main__":
     #                         )
     #
 
+        # os.makedirs(f'{run_dir}/models', mode=0o750, exist_ok=True)
+        # save_dir = f'{run_dir}/models/best_model.h5'
+        # savemodel_callback = tf.keras.callbacks.ModelCheckpoint(filepath=save_dir, verbose=0, save_best_only=True)
+
+
         history = model.fit_generator(generator=my_training_batch_generator,
                             steps_per_epoch=int(0.8 * ntrainingvalidation // batch_size),
                             epochs=10,
                             verbose=1,
                             validation_data=my_validation_batch_generator,
                             validation_steps=int(0.2 * ntrainingvalidation // batch_size),
-                            # callbacks=[history_logger],
+                            # callbacks=[savemodel_callback],
                                       )
 
 
