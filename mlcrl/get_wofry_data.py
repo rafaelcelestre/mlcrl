@@ -3,7 +3,7 @@
 import numpy
 import h5py
 
-def get_wofry_data(root, dir_out="./", training_ratio=2/3, verbose=1, gs_or_z=0, nbin=1):
+def get_wofry_data(root, dir_out="./", training_ratio=2/3, verbose=1, gs_or_z=0, nbin=1, only1000=False):
     if gs_or_z == 0:
         filename = "%s%s_targets_gs.txt" % (dir_out, root)
     else:
@@ -11,15 +11,22 @@ def get_wofry_data(root, dir_out="./", training_ratio=2/3, verbose=1, gs_or_z=0,
 
     tmp = numpy.loadtxt(filename)
 
+    if only1000: tmp = tmp[0:1000,:]
+
     targets = tmp[:,1:].copy()
 
-    if verbose: print(targets.shape, targets)
+    if verbose: print("targets.shape, targets: ", targets.shape, targets)
 
     h5_file = "%s%s_block.h5" % (dir_out, root)
 
     f = h5py.File(h5_file, 'r')
 
     data = f['allsamples/intensity/stack_data'][:]
+
+    if only1000: data = data[0:1000, :]
+
+    if verbose: print("data.shape, data: ", targets.shape, targets)
+
 
     f.close()
 
