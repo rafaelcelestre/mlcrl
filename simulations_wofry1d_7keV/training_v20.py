@@ -114,7 +114,7 @@ if __name__ == "__main__":
     #
     #
     do_train = 1
-    model_root = "training_v20"
+    model_root = "training_v20epoch6000"
 
     if do_train:
         model = get_model(input_shape = tuple((256, 64//nbin, 1)),)
@@ -146,7 +146,7 @@ if __name__ == "__main__":
 
 
         history = model.fit(training_data, training_target,
-                            epochs=1500, batch_size=64, validation_split=0.2,
+                            epochs=1500*4, batch_size=64, validation_split=0.2,
                             # callbacks=[history_logger],
                             )
 

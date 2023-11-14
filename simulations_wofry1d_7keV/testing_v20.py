@@ -71,12 +71,16 @@ if __name__ == "__main__":
     # basis_used = 'gs'
     # nbin = 1
     # pstart = 100
+    dir_files = "/users/srio/Oasys/ML_TRAIN_V20_5000" # profiles
+    dir_wofrydata = "/scisoft/users/srio/ML_TRAIN2_V20/" # wofry simulations
 
-    dir_wofrydata = "/scisoft/users/srio/ML_TRAIN2_V20/"
-    dir_out = "/scisoft/users/srio/ML_TRAIN2_V20/1000/"
+    dir_out = "/scisoft/users/srio/ML_TRAIN2_V20/5000/"  # CNN data
+    only1000 = False
+
+
     model_root = "training_v20"
-    dir_files = "/users/srio/Oasys/ML_TRAIN_V20_5000"
-    only1000 = True
+
+
     basis_used = 'gs'
     nbin = 1
     pstart = 100
