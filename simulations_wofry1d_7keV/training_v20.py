@@ -64,11 +64,11 @@ if __name__ == "__main__":
 
     dir_wofrydata = "/scisoft/users/srio/ML_TRAIN2_V20/"
 
-    dir_out =       "/scisoft/users/srio/ML_TRAIN2_V20/1000/"  # where the results are going to be written
-    only1000 = True
+    # dir_out =       "/scisoft/users/srio/ML_TRAIN2_V20/1000/"  # where the results are going to be written
+    # only1000 = True
 
-    # dir_out =       "/scisoft/users/srio/ML_TRAIN2_V20/5000/"  # where the results are going to be written
-    # only1000 = False
+    dir_out =       "/scisoft/users/srio/ML_TRAIN2_V20/5000/"  # where the results are going to be written
+    only1000 = False
     #
     # dir_out =       "/scisoft/users/srio/ML_TRAIN2_V20/MULTIMODE/"  # where the results are going to be written
     # only1000 = False
