@@ -79,6 +79,7 @@ if __name__ == "__main__":
 
 
     model_root = "training_v20"
+    model_root = "training_v20epoch6000"
 
 
     basis_used = 'gs'

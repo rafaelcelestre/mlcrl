@@ -257,11 +257,17 @@ if __name__ == "__main__":
     do_intermediate_plot = 0
     do_plot = 0
 
-    nsamples = 5000
+    # nsamples = 5000
+    nsamples = 15000
     nsamples_plot = 5
 
-    dir = "/users/srio/Oasys/ML_TRAIN_V20_5000/"   # where the profile files sit
-    dir_out = "/scisoft/users/srio/ML_TRAIN2_V20/" # where the results are going to be written
+    # dir = "/users/srio/Oasys/ML_TRAIN_V20_5000/"   # where the profile files sit
+    # dir_out = "/scisoft/users/srio/ML_TRAIN2_V20/" # where the results are going to be written
+
+    dir = "/users/srio/Oasys/ML_TRAIN_V20_25000/"   # where the profile files sit
+    dir_out = "/scisoft/users/srio/ML_TRAIN2_V21/" # where the results are going to be written
+
+
     root = "tmp_ml"
 
     #

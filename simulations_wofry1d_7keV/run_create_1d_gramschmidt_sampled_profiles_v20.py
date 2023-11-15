@@ -47,8 +47,12 @@ if __name__ == "__main__":
 
     # create sampled profiles
     size = basis_x.size
-    nsamples = 5000
-    seed = 69  # seed for generation of the random Zernike profiles
+    # nsamples = 5000
+    # seed = 69  # seed for generation of the random Zernike profiles
+
+    nsamples = 25000
+    seed = 696969  # seed for generation of the random Zernike profiles
+
     noll         =               [6,   8,  10,  11,  14,  22, 37]  # removed 12!!!!!!!!!!!!!!!!!!
     # distrubution =             ['n', 'n', 'n', 'u', 'n', 'u', 'u']
     # scale        = numpy.array([0.5, 0.5, 0.5, 2.3, .05, 1.0, 0.5]) * 1e-6
@@ -103,7 +107,7 @@ if __name__ == "__main__":
 
 
     if True: # write files
-        dir = "/nobackup/gurb1/srio/Oasys/ML_TRAIN_V20_5000/"
+        dir = "/nobackup/gurb1/srio/Oasys/ML_TRAIN_V20_25000/"
         root = "tmp_ml"
 
         for i in range(nsamples):
