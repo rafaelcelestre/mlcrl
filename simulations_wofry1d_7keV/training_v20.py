@@ -63,12 +63,12 @@ def get_model(
 if __name__ == "__main__":
 
     # dir_wofrydata = "/scisoft/users/srio/ML_TRAIN2_V20/"
-    dir_wofrydata = "/scisoft/users/srio/ML_TRAIN2_V21/"
+    dir_wofrydata = "/scisoft/users/srio/MLCRL/V20/ML_TRAIN2_V21/"
 
     # dir_out =       "/scisoft/users/srio/ML_TRAIN2_V20/1000/"  # where the results are going to be written
     # only1000 = True
 
-    dir_out =       "/scisoft/users/srio/ML_TRAIN2_V21/12500/"  # where the results are going to be written
+    dir_out =       "//scisoft/users/srio/MLCRL/V20/ML_TRAIN2_V21/12500/"  # where the results are going to be written
     only1000 = False
     #
     # dir_out =       "/scisoft/users/srio/ML_TRAIN2_V20/MULTIMODE/"  # where the results are going to be written
@@ -114,8 +114,8 @@ if __name__ == "__main__":
     #
     #
     #
-    do_train = 1
-    model_root = "training_v20epoch6000"
+    do_train = 0
+    model_root = "training_v21epoch1500"
 
     if do_train:
         model = get_model(input_shape = tuple((256, 64//nbin, 1)),)
