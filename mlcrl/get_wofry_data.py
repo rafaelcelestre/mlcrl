@@ -1,17 +1,16 @@
-
-
 import numpy
 import h5py
 
-def get_wofry_data(root, dir_out="./", training_ratio=2/3, verbose=1, gs_or_z=0, nbin=1, only1000=False):
+def get_wofry_data(root, dir_out="./", training_ratio=2/3, verbose=1, gs_or_z=0, nbin=1, only1000=False, nsamplesmax=-1):
     if gs_or_z == 0:
         filename = "%s%s_targets_gs.txt" % (dir_out, root)
     else:
         filename = "%s%s_targets_z.txt" % (dir_out, root)
 
-    tmp = numpy.loadtxt(filename)
+    if only1000: nsamplesmax=1000
 
-    if only1000: tmp = tmp[0:1000,:]
+    tmp = numpy.loadtxt(filename)
+    tmp = tmp[0:nsamplesmax,:]
 
     targets = tmp[:,1:].copy()
 
@@ -22,8 +21,7 @@ def get_wofry_data(root, dir_out="./", training_ratio=2/3, verbose=1, gs_or_z=0,
     f = h5py.File(h5_file, 'r')
 
     data = f['allsamples/intensity/stack_data'][:]
-
-    if only1000: data = data[0:1000, :]
+    data = data[0:nsamplesmax, :]
 
     if verbose: print("data.shape, data: ", targets.shape, targets)
 
@@ -54,12 +52,10 @@ def get_wofry_data(root, dir_out="./", training_ratio=2/3, verbose=1, gs_or_z=0,
 
 if __name__ == "__main__":
 
-
-    dir_out = "/users/srio/Oasys/ML_TRAIN2/"  # where the results are going to be written
+    dir_out = "/scisoft/users/srio/MLCRL/V20/ML_TRAIN2_V21/"
     root = "tmp_ml"
 
-
-    (training_data, training_target), (test_data, test_target) = get_wofry_data(root, dir_out=dir_out, nbin=1)
+    (training_data, training_target), (test_data, test_target) = get_wofry_data(root, dir_out=dir_out, nbin=1, nsamplesmax=2000)
 
     print("Training [data/target]: ", training_data.shape, training_target.shape)
     print("Test: [data/target]", test_data.shape, test_target.shape)
