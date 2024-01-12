@@ -2,6 +2,7 @@
 
 import numpy
 from mlcrl.get_wofry_data import get_wofry_data
+import tensorflow as tf
 from tensorflow.keras import layers
 from tensorflow.keras import models
 
@@ -75,7 +76,7 @@ if __name__ == "__main__":
                                                                                 gs_or_z=0,
                                                                                 nbin=nbin,     # !!!!!!!!!!!!!! binning  !!!!!!!!!!!
                                                                                 only1000=only1000, # !!!!!!!!! cutting N
-                                                                                nsamplesmax=5000,
+                                                                                nsamplesmax=10000,
                                                                                 )
 
     print("Training: ", training_data.shape, training_target.shape)
@@ -105,7 +106,7 @@ if __name__ == "__main__":
     #
     do_train = 1
     do_plot = 0
-    model_root = "training_v25_n5000_epoch1500"
+    model_root = "training_v25_n10000_epoch4000"
 
     if do_train:
         model = get_model(input_shape = tuple((256, 64//nbin, 1)),)
@@ -134,11 +135,22 @@ if __name__ == "__main__":
         # filename = 'training_v1.csv'
         # import tensorflow as tf
         # history_logger = tf.keras.callbacks.CSVLogger(filename, separator=" ", append=False)
+        cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath='%s/%s_checkpoint{epoch:04d}.h5' % (dir_out, model_root),
+                                                         save_weights_only=False,
+                                                         monitor='val_accuracy',
+                                                         mode='max',
+                                                         verbose=1,
+                                                         save_best_only=True,
+                                                         period=10,
+                                                         )
 
+        log_callback = tf.keras.callbacks.CSVLogger('%s/%s_checkpoint.log' % (dir_out, model_root),
+                                                    separator=",",
+                                                    append=False)
 
         history = model.fit(training_data, training_target,
-                            epochs=1500, batch_size=64, validation_split=0.2,
-                            # callbacks=[history_logger],
+                            epochs=4000, batch_size=64, validation_split=0.2,
+                            callbacks=[cp_callback, log_callback],
                             )
 
         model.save('%s/%s.h5' % (dir_out, model_root))

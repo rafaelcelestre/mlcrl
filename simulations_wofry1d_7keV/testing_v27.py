@@ -6,84 +6,37 @@ from mlcrl.create_1d_zernike_basis import create_1d_zernike_basis
 
 from srxraylib.plot.gol import plot, plot_table
 
+import matplotlib
+matplotlib.rcParams.update({'font.size': 14})
 
 if __name__ == "__main__":
 
     do_plot = 1
+    version = "27"
+    n_files = 10000
 
-    root = "tmp_ml"
+    root = "profile_"
+    dir_files = "/scisoft/users/srio/MLCRL/V%s/sampled_profiles/" % (version)  # profiles
+    dir_wofrydata = "/scisoft/users/srio/MLCRL/V%s/wofry_results/" % (version) # wofry simulations
+    dir_out = "/scisoft/users/srio/MLCRL/V%s/" % (version)  # CNN data
+    only1000 = False
+    # model_root = "training_v%s_n10000_epoch4000_checkpoint1570" % (version)
+    # history_root = "training_v%s_n10000_epoch4000" % (version) # model_root
+    # model_root = "training_v%s_n10000_epoch4000_checkpoint0960" % (version)
+    # history_root = "training_v%s_n10000_epoch4000" % (version) # model_root
+    model_root = "training_v%s_n10000_epoch4000_checkpoint1820" % (version)
+    history_root = "training_v%s_n10000_epoch4000" % (version) # model_root
 
-    # dir_out = "/scisoft/users/srio/ML_TRAIN2/1000/"
-    # model_root = "training_v12"
-    # dir_files = "/users/srio/Oasys/ML_TRAIN"
-    # n_files = 1000
-    # basis_used = 'gs'
-    # nbin = 1
-    # pstart = 100
-
-
-    # dir_out = "/scisoft/users/srio/ML_TRAIN2/"
-    # model_root = "training_v13"
-    # dir_files = "/users/srio/Oasys/ML_TRAIN5000"
-    # n_files = 5000
-    # basis_used = 'gs'
-    # nbin = 1
-    # pstart = 100
-
-
-    # dir_out = "/scisoft/users/srio/ML_TRAIN2/"
-    # model_root = "training_v14"
-    # dir_files = "/users/srio/Oasys/ML_TRAIN5000"
-    # n_files = 5000
-    # basis_used = 'z'
-    # nbin = 1
-    # pstart = 100
-
-
-    # dir_out = "/scisoft/users/srio/ML_TRAIN2/"
-    # model_root = "training_v15"
-    # dir_files = "/users/srio/Oasys/ML_TRAIN5000"
-    # n_files = 5000
-    # basis_used = 'gs'
-    # nbin = 2
-    # pstart = 100
-
-    # dir_out = "/scisoft/users/srio/ML_TRAIN2/"
-    # model_root = "training_v16"
-    # dir_files = "/users/srio/Oasys/ML_TRAIN5000"
-    # n_files = 5000
-    # basis_used = 'gs'
-    # nbin = 4
-    # pstart = 100
-
-    # dir_out = "/scisoft/users/srio/ML_TRAIN2/"
-    # model_root = "training_v19"
-    # dir_files = "/users/srio/Oasys/ML_TRAIN5000"
-    # n_files = 5000
-    # basis_used = 'gs'
-    # nbin = -2
-    # pstart = 100
-
-    # dir_out = "/scisoft/users/srio/ML_TRAIN2/MULTIMODE/"
-    # model_root = "training_v20"
-    # dir_files = "/users/srio/Oasys/ML_TRAIN5000"
-    # n_files = 5000
-    # basis_used = 'gs'
-    # nbin = 1
-    # pstart = 100
-
-    dir_out = "/scisoft/users/srio/ML_TRAIN2/MULTIMODE/"
-    model_root = "training_v23"
-    dir_files = "/users/srio/Oasys/ML_TRAIN5000"
-    n_files = 5000
     basis_used = 'gs'
     nbin = 1
     pstart = 100
 
+
+
     if basis_used == 'gs':
-        (training_data, training_target), (test_data, test_target) = get_wofry_data(root, dir_out=dir_out, verbose=0, gs_or_z=0, nbin=nbin)
+        (training_data, training_target), (test_data, test_target) = get_wofry_data(root, dir_out=dir_wofrydata, verbose=0, gs_or_z=0, nbin=nbin, only1000=only1000, nsamplesmax=n_files)
     elif basis_used == 'z':
-        (training_data, training_target), (test_data, test_target) = get_wofry_data(root, dir_out=dir_out, verbose=0, gs_or_z=1, nbin=nbin)
+        (training_data, training_target), (test_data, test_target) = get_wofry_data(root, dir_out=dir_wofrydata, verbose=0, gs_or_z=1, nbin=nbin, only1000=only1000, nsamplesmax=n_files)
     else:
         raise Exception("error...")
     print("Training: ", training_data.shape, training_target.shape)
@@ -108,40 +61,64 @@ if __name__ == "__main__":
     test_data = (test_data - min_training_data) / (max_training_data - min_training_data)
 
     #
-    # load model
+    # load history
     #
     if True:
+
+        try:
+            import json
+            raise Exception("provoked!!!")
+            f = open("%s/%s.json" % (dir_out, history_root), "r")
+            f_txt = f.read()
+            history_dict = json.loads(f_txt)
+
+            print(history_dict.keys())
+
+            loss_values = history_dict['loss']
+            val_loss_values = history_dict['val_loss']
+            epochs = range(1, len(loss_values) + 1)
+            if False: plot(epochs, loss_values,
+                 epochs, val_loss_values,
+                 legend=['loss','val_loss'], xtitle='Epochs', ytitle='Loss', show=0)
+
+            acc_values = history_dict['accuracy']
+            val_acc_values = history_dict['val_accuracy']
+            # if do_plot: plot(epochs, acc_values,
+            #      epochs, val_acc_values,
+            #      legend=['accuracy','val_accuracy'], xtitle='Epochs', ytitle='accuracy')
+            if do_plot: plot(epochs[::10], val_acc_values[::10],
+                 epochs[::10], acc_values[::10],
+                 legend=['accuracy on validation set', 'accuracy on training set'],
+                 color=['g', 'b'], xtitle='Epochs', ytitle='accuracy', ylog=0)
+        except:
+            print(">>>> Fail to load %s/%s.json  TRY ...checkpoint.log" % (dir_out, history_root))
+
+            try:
+                log_data = numpy.loadtxt("%s/%s_checkpoint.log" % (dir_out, history_root), skiprows=1, delimiter=',')
+
+                print(type(log_data), log_data.shape, log_data)
+
+                epochs = log_data[:,0]
+                accuracy = log_data[:,1]
+                loss = log_data[:,2]
+                val_accuracy = log_data[:,3]
+                val_loss = log_data[:,4]
+
+                if do_plot: plot(epochs, loss,
+                     epochs, val_loss,
+                     legend=['loss','val_loss'], xtitle='Epochs', ytitle='Loss', show=0)
+
+                if do_plot: plot(epochs[::10], val_accuracy[::10],
+                     epochs[::10], accuracy[::10],
+                     legend=['accuracy on validation set', 'accuracy on training set'],
+                     color=['g', 'b'], xtitle='Epochs', ytitle='accuracy', ylog=0)
+            except:
+                raise Exception(">>>> Fail to load %s/%s.log  TRY ...checkpoint.log" % (dir_out, history_root))
+        #
+        # load model
+        #
         from keras.models import load_model
-        import json
-
         model = load_model('%s/%s.h5' % (dir_out, model_root))
-
-        # learning with v13 and loading training v23: Does not work
-        #model = load_model('%s/%s.h5' % (dir_out, "../training_v13"))
-
-
-        f = open("%s/%s.json" % (dir_out, model_root), "r")
-        f_txt = f.read()
-        history_dict = json.loads(f_txt)
-
-        print(history_dict.keys())
-
-        loss_values = history_dict['loss']
-        val_loss_values = history_dict['val_loss']
-        epochs = range(1, len(loss_values) + 1)
-        if do_plot: plot(epochs, loss_values,
-             epochs, val_loss_values,
-             legend=['loss','val_loss'], xtitle='Epochs', ytitle='Loss', show=0)
-
-        acc_values = history_dict['accuracy']
-        val_acc_values = history_dict['val_accuracy']
-        # if do_plot: plot(epochs, acc_values,
-        #      epochs, val_acc_values,
-        #      legend=['accuracy','val_accuracy'], xtitle='Epochs', ytitle='accuracy')
-        if do_plot: plot(epochs[::10], val_acc_values[::10],
-             epochs[::10], acc_values[::10],
-             legend=['accuracy on validation set', 'accuracy on training set'],
-             color=['g', 'b'], xtitle='Epochs', ytitle='accuracy', ylog=0)
 
         #
         # test evaluation

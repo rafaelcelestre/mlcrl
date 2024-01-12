@@ -1,5 +1,13 @@
 Mechanism of a simulation flowchart:
 
+V10: First version of paper. (single-lens) [this includes multimode that are labeled V2*].
+
+Second version (multi-lens).
+V20: using all random over 1500 um
+V25: using Rafael recipe over 1500 um
+V26: using Rafael recipe recipe over 800 um
+V27: using all random over 800 um
+
 1) create the deformation files and the targets (polynomial coeffs - we use orthonormal polynomials)
    # V10
    # script: run_create_1d_gramschmidt_sampled_profiles.py
