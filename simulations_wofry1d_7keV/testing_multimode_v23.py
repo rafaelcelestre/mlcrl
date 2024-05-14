@@ -9,6 +9,8 @@ from srxraylib.plot.gol import plot, plot_table
 import matplotlib
 matplotlib.rcParams.update({'font.size': 14})
 
+from testing_multimode_v20 import dump_file
+
 if __name__ == "__main__":
 
     do_plot = 1
@@ -149,6 +151,12 @@ if __name__ == "__main__":
              epochs[::10], acc_values[::10],
              legend=['accuracy on validation set', 'accuracy on training set'],
              color=['g', 'b'], xtitle='Epochs', ytitle='accuracy', xrange=[700,15300], yrange=[0.9,1], ylog=0)
+
+        f = open("figure5.dat","w")
+        for i in range(len(epochs)):
+            f.write("%g    %g    %g   \n" % (epochs[i], val_acc_values[i], acc_values[i]))
+        f.close()
+        print("File figure5.dat written to disk.")
         #
         # test evaluation
         #
@@ -230,6 +238,8 @@ if __name__ == "__main__":
              marker=[None,None,'.'],
              title="testing sample %d (sample # %d)" % (i, i_file),
              xtitle="abscissas [mm]", ytitle="Profile height [$\mu$m]", )
+
+        dump_file(basis_x * 1e3, profile_orig, profile_fit, "tmp_v23_%i.dat" % i)
 
         # plot(a[:,0]*1e6, a[:,1]*1e6)
 

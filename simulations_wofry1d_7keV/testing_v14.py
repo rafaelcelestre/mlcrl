@@ -9,6 +9,9 @@ from srxraylib.plot.gol import plot, plot_table
 import matplotlib
 matplotlib.rcParams.update({'font.size': 14})
 
+from testing_multimode_v20 import dump_file
+
+
 if __name__ == "__main__":
 
     do_plot = 1
@@ -184,6 +187,8 @@ if __name__ == "__main__":
              marker=[None,None,'.'],
              title="testing sample %d (sample # %d)" % (i, i_file),
              xtitle="abscissas [mm]", ytitle="Profile height [$\mu$m]", )
+
+        dump_file(basis_x * 1e3, profile_orig, profile_fit, "tmp_v14_%i.dat" % i)
 
         # plot(a[:,0]*1e6, a[:,1]*1e6)
 

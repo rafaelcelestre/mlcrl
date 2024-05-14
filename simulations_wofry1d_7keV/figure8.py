@@ -262,20 +262,61 @@ def run_beamline(output_wavefront, error_file='/scisoft/users/srio/MLCRL/V26/sam
     return output_wavefront
 
 if __name__ == "__main__":
-    ws = run_source()
-    w0 = run_beamline(ws, error_file="profileV25_103_true.dat")
-    w1 = run_beamline(ws, error_file="profileV25_103_guess.dat")
-    w2 = run_beamline(ws, error_file="profileV26_103_guess.dat")
+    do_calculation = 0
+
+    if do_calculation:
+        ws = run_source()
+        w0 = run_beamline(ws, error_file="profileV25_103_true.dat")
+        w1 = run_beamline(ws, error_file="profileV25_103_guess.dat")
+        w2 = run_beamline(ws, error_file="profileV26_103_guess.dat")
 
 
-    plot(w0.get_abscissas() * 1e6, w0.get_intensity(),
-         w1.get_abscissas() * 1e6, w1.get_intensity(),
-         w2.get_abscissas() * 1e6, w2.get_intensity(),
-         legend=['true profile', 'from coeffs with 1500um window',  'from coeffs with 800um window'],
-         title='', xtitle=r'x [$\mu$m]', ytitle='intensity', xrange=[-4,4], ylog=1)
+        plot(w0.get_abscissas() * 1e6, w0.get_intensity(),
+             w1.get_abscissas() * 1e6, w1.get_intensity(),
+             w2.get_abscissas() * 1e6, w2.get_intensity(),
+             legend=['true profile', 'from coeffs with 1500um window',  'from coeffs with 800um window'],
+             title='', xtitle=r'x [$\mu$m]', ytitle='intensity', xrange=[-4,4], ylog=1)
 
-    plot(w0.get_abscissas() * 1e6, w0.get_intensity(),
-         w1.get_abscissas() * 1e6, w1.get_intensity(),
-         w2.get_abscissas() * 1e6, w2.get_intensity(),
-         legend=['true', 'large window',  'small window'],
-         title='', xtitle=r'x [$\mu$m]', ytitle='intensity', xrange=[-4,4])
+        plot(w0.get_abscissas() * 1e6, w0.get_intensity(),
+             w1.get_abscissas() * 1e6, w1.get_intensity(),
+             w2.get_abscissas() * 1e6, w2.get_intensity(),
+             legend=['true', 'large window',  'small window'],
+             title='', xtitle=r'x [$\mu$m]', ytitle='intensity', xrange=[-4,4])
+
+        W00 = w0.get_abscissas() * 1e6
+        W10 = w1.get_abscissas() * 1e6
+        W20 = w2.get_abscissas() * 1e6
+        W01 = w0.get_intensity()
+        W11 = w1.get_intensity()
+        W21 = w2.get_intensity()
+
+        plot(W00, W01,
+             W10, W11,
+             W20, W21,
+             legend=['true', 'large window',  'small window'],
+             title='', xtitle=r'x [$\mu$m]', ytitle='intensity', xrange=[-4,4])
+
+        f = open("figure8.dat","w")
+        for i in range(W00.size):
+            f.write("%g    %g    %g    %g    %g    %g\n" % (W00[i], W01[i], W10[i], W11[i], W20[i], W21[i],))
+        f.close()
+        print("File figure8.dat written to disk.")
+
+    else:
+        a = numpy.loadtxt('figure8.dat')
+        W00 = a[:,0]
+        W01 = a[:,1]
+        W10 = a[:,2]
+        W11 = a[:,3]
+        W20 = a[:,4]
+        W21 = a[:,5]
+
+        import matplotlib
+        matplotlib.rcParams.update({'font.size': 14})
+
+        plot(W00, W01,
+             W10, W11,
+             W20[::10], W21[::10],
+             legend=['true', 'large window',  'small window'],
+             title='', xtitle=r'x [$\mu$m]', ytitle='intensity [arbitrary units]', xrange=[-3,3],
+             linestyle=[None, '--', ''], marker=[None,None,'x'])

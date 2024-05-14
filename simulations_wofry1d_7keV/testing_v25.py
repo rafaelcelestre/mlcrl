@@ -9,6 +9,8 @@ from srxraylib.plot.gol import plot, plot_table
 import matplotlib
 matplotlib.rcParams.update({'font.size': 14})
 
+from testing_multimode_v20 import dump_file
+
 if __name__ == "__main__":
 
     do_plot = 1
@@ -205,10 +207,12 @@ if __name__ == "__main__":
         if True:
             ft = open("profileV%s_%d_true.dat" % (version, i), 'w')
             fg = open("profileV%s_%d_guess.dat" % (version, i), 'w')
-            for i in range(basis_x.size):
-                ft.write("%g  %g\n" % (basis_x[i], 1e-6 * profile_orig[i]))
-                fg.write("%g  %g\n" % (basis_x[i], 1e-6 * profile_fit[i]))
+            for ii in range(basis_x.size):
+                ft.write("%g  %g\n" % (basis_x[ii], 1e-6 * profile_orig[ii]))
+                fg.write("%g  %g\n" % (basis_x[ii], 1e-6 * profile_fit[ii]))
             print("Files profile* written to disk.")
+
+        dump_file(basis_x * 1e3, profile_orig, profile_fit, "tmp_v25_%i.dat" % i)
 
         # plot(a[:,0]*1e6, a[:,1]*1e6)
 
